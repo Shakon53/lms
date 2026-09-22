@@ -2375,19 +2375,19 @@ def get_pwa_manifest():
 		# set one got a squashed app icon.
 		"icons": [
 			{
-				"src": "/assets/lms/frontend/manifest/yu-lms-mark-192.maskable.png",
+				"src": "/assets/lms/frontend/manifest/yu-lms-book-192-v3.maskable.png",
 				"sizes": "192x192",
 				"type": "image/png",
 				"purpose": "any",
 			},
 			{
-				"src": "/assets/lms/frontend/manifest/yu-lms-mark-512.maskable.png",
+				"src": "/assets/lms/frontend/manifest/yu-lms-book-512-v3.maskable.png",
 				"sizes": "512x512",
 				"type": "image/png",
 				"purpose": "any",
 			},
 			{
-				"src": "/assets/lms/frontend/manifest/yu-lms-mark-512.maskable.png",
+				"src": "/assets/lms/frontend/manifest/yu-lms-book-512-v3.maskable.png",
 				"sizes": "512x512",
 				"type": "image/png",
 				"purpose": "maskable",
