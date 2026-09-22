@@ -79,7 +79,7 @@
 
 <script setup lang="ts">
 import { Button, createResource, toast } from 'frappe-ui'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Draggable from 'vuedraggable'
 
@@ -152,10 +152,8 @@ const props = withDefaults(
 		selectedLessonNumber: '',
 		completedLesson: null,
 		hideHeader: false,
-	}
+	},
 )
-
-defineExpose({ openChapterForm })
 
 const outline = createResource({
 	url: 'lms.lms.utils.get_course_outline',
@@ -168,7 +166,7 @@ const outline = createResource({
 
 watch(
 	() => props.courseName,
-	() => outline.reload()
+	() => outline.reload(),
 )
 
 watch(
@@ -182,7 +180,7 @@ watch(
 				break
 			}
 		}
-	}
+	},
 )
 
 const deleteLesson = createResource({
@@ -196,7 +194,7 @@ const deleteLesson = createResource({
 	},
 	onError(err: { messages?: string[] } | string) {
 		toast.error(
-			typeof err === 'string' ? err : err.messages?.[0] ?? __('Error')
+			typeof err === 'string' ? err : (err.messages?.[0] ?? __('Error')),
 		)
 	},
 })
@@ -239,7 +237,7 @@ const deleteChapter = createResource({
 	},
 	onError(err: { messages?: string[] } | string) {
 		toast.error(
-			typeof err === 'string' ? err : err.messages?.[0] ?? __('Error')
+			typeof err === 'string' ? err : (err.messages?.[0] ?? __('Error')),
 		)
 	},
 })
@@ -261,7 +259,7 @@ const renameChapterResource = createResource({
 	},
 	onError(err: { messages?: string[] } | string) {
 		outline.reload()
-		toast.error(typeof err === 'string' ? err : err.messages?.[0] ?? 'Error')
+		toast.error(typeof err === 'string' ? err : (err.messages?.[0] ?? 'Error'))
 	},
 })
 
@@ -270,7 +268,7 @@ function renameChapter(payload: { chapter: OutlineChapter; title: string }) {
 }
 
 const errorMessage = (err: { messages?: string[] } | string): string =>
-	typeof err === 'string' ? err : err.messages?.[0] ?? 'Error'
+	typeof err === 'string' ? err : (err.messages?.[0] ?? 'Error')
 
 // Inserts the Course Lesson and its chapter reference in one request, so a
 // failure on either rolls back atomically: no orphaned lesson. Returns the
@@ -282,15 +280,26 @@ const addLesson = createResource({
 	},
 })
 
-// Create the lesson immediately as "Untitled lesson", then open it in the
-// editor so the title is edited inline on the lesson itself.
-function createLessonInline(payload: {
-	chapter: OutlineChapter
-	lessonIdx: number
-}) {
-	creatingLessonChapter.value = payload.chapter.name
+const addFirstChapter = createResource({
+	url: 'lms.lms.api.upsert_chapter',
+	makeParams() {
+		return {
+			title: __('Section 1'),
+			course: props.courseName,
+			is_scorm_package: false,
+			scorm_package: null,
+		}
+	},
+})
+
+const quickCreateLoading = computed(() =>
+	Boolean(addLesson.loading || addFirstChapter.loading),
+)
+
+function createLessonInChapter(chapterName: string) {
+	creatingLessonChapter.value = chapterName
 	addLesson.submit(
-		{ chapter: payload.chapter.name },
+		{ chapter: chapterName },
 		{
 			onSuccess(lessonName: string) {
 				creatingLessonChapter.value = ''
@@ -305,8 +314,50 @@ function createLessonInline(payload: {
 				creatingLessonChapter.value = ''
 				toast.error(errorMessage(err))
 			},
-		}
+		},
 	)
+}
+
+// The primary "Add lesson" action does not make a new author understand the
+// chapter model first. It reuses the selected regular chapter when possible,
+// otherwise the first regular chapter, and creates a sensible default section
+// for a completely empty (or SCORM-only) course.
+function createQuickLesson() {
+	if (quickCreateLoading.value || outline.loading) return
+	const regularChapters = (outline.data ?? []).filter(
+		(chapter) => !chapter.is_scorm_package,
+	)
+	const selectedChapterNumber = props.selectedLessonNumber?.split('-')[0]
+	const target =
+		regularChapters.find(
+			(chapter) => String(chapter.idx) === selectedChapterNumber,
+		) ?? regularChapters[0]
+
+	if (target) {
+		createLessonInChapter(target.name)
+		return
+	}
+
+	addFirstChapter.submit(
+		{},
+		{
+			onSuccess(chapter: OutlineChapter) {
+				createLessonInChapter(chapter.name)
+			},
+			onError(err: { messages?: string[] } | string) {
+				toast.error(errorMessage(err))
+			},
+		},
+	)
+}
+
+// Create the lesson immediately as "Untitled lesson", then open it in the
+// editor so the title is edited inline on the lesson itself.
+function createLessonInline(payload: {
+	chapter: OutlineChapter
+	lessonIdx: number
+}) {
+	createLessonInChapter(payload.chapter.name)
 }
 
 function navigateToLesson(lesson: OutlineLesson) {
@@ -329,7 +380,7 @@ function trashLesson(lessonName: string, chapterName: string) {
 	$dialog({
 		title: __('Delete this lesson?'),
 		message: __(
-			'Deleting this lesson will permanently remove it from the course. This action cannot be undone. Are you sure you want to continue?'
+			'Deleting this lesson will permanently remove it from the course. This action cannot be undone. Are you sure you want to continue?',
 		),
 		actions: [
 			{
@@ -342,7 +393,7 @@ function trashLesson(lessonName: string, chapterName: string) {
 					// concurrent deletes. Runs alongside the resource-level reload.
 					deleteLesson.submit(
 						{ lesson: lessonName, chapter: chapterName },
-						{ onSuccess: () => emit('lesson-deleted', { lesson: lessonName }) }
+						{ onSuccess: () => emit('lesson-deleted', { lesson: lessonName }) },
 					)
 					close()
 				},
@@ -355,7 +406,7 @@ function trashChapter(chapterName: string) {
 	$dialog({
 		title: __('Delete this chapter?'),
 		message: __(
-			'Deleting this chapter will also delete all its lessons and permanently remove it from the course. This action cannot be undone. Are you sure you want to continue?'
+			'Deleting this chapter will also delete all its lessons and permanently remove it from the course. This action cannot be undone. Are you sure you want to continue?',
 		),
 		actions: [
 			{
@@ -368,7 +419,7 @@ function trashChapter(chapterName: string) {
 						{
 							onSuccess: () =>
 								emit('chapter-deleted', { chapter: chapterName }),
-						}
+						},
 					)
 					close()
 				},
@@ -412,4 +463,6 @@ function updateChapterOrder(e: DraggableEvent) {
 		idx: e.newIndex,
 	})
 }
+
+defineExpose({ openChapterForm, createQuickLesson, quickCreateLoading })
 </script>

@@ -102,7 +102,7 @@
 			<div v-if="canCreate" class="flex items-center justify-end">
 				<HeaderButton
 					data-testid="new-course-save"
-					:label="__('Save')"
+					:label="__('Save and add first lesson')"
 					variant="solid"
 					:loading="courses.insert.loading"
 					@click="saveCourse()"
@@ -212,7 +212,7 @@ const course = ref<Course>({
 const INSTRUCTOR_ROLES = ['Course Creator', 'Batch Evaluator']
 const MAX_VISIBLE_AVATARS = 3
 const thumbnailGuidelines = __(
-	'Upload a 750×422 image (.jpg, .jpeg, .gif, or .png). Shown on the catalog card and lesson hero.'
+	'Upload a 750×422 image (.jpg, .jpeg, .gif, or .png). Shown on the catalog card and lesson hero.',
 )
 const { inputId: descriptionId, labelId: descriptionLabelId } =
 	useInputLabeling({})
@@ -263,13 +263,13 @@ watch(
 	(vals) => {
 		const missing = (vals || []).filter((v) => !resolvedDetails.value.has(v))
 		if (missing.length) selectedDetails.reload()
-	}
+	},
 )
 
 const resolvedSelected = computed<InstructorOption[]>(() =>
 	course.value.instructors
 		.map((v) => resolvedDetails.value.get(v))
-		.filter((o): o is InstructorOption => Boolean(o))
+		.filter((o): o is InstructorOption => Boolean(o)),
 )
 
 const optionByValue = computed<Map<string, InstructorOption>>(() => {
@@ -290,13 +290,13 @@ const visibleAvatars = computed<InstructorOption[]>(() =>
 					label: v,
 					image: '',
 					description: '',
-				} as InstructorOption)
+				} as InstructorOption),
 		)
-		.filter((o): o is InstructorOption => Boolean(o))
+		.filter((o): o is InstructorOption => Boolean(o)),
 )
 
 const overflowCount = computed<number>(() =>
-	Math.max(0, course.value.instructors.length - MAX_VISIBLE_AVATARS)
+	Math.max(0, course.value.instructors.length - MAX_VISIBLE_AVATARS),
 )
 
 function openMemberModal(close: () => void) {
@@ -348,7 +348,8 @@ const saveCourse = () => {
 				saveAndReplace({
 					name: 'CourseDetail',
 					params: { courseName: data.name },
-					hash: '#settings',
+					hash: '#editor',
+					query: { quickAddLesson: '1' },
 				})
 				if (user.data?.is_system_manager) {
 					updateOnboardingStep('create_first_course', true, false, () => {
@@ -360,7 +361,7 @@ const saveCourse = () => {
 				toast.error(cleanError(err.messages?.[0]))
 				console.error(err)
 			},
-		}
+		},
 	)
 }
 

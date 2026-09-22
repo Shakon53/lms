@@ -193,7 +193,7 @@ const FIELD_LABELS = [
 // allowed to bubble, or the test would pass without exercising the guard.
 const pressCtrlS = (): void => {
 	document.body.dispatchEvent(
-		new KeyboardEvent('keydown', { key: 's', ctrlKey: true, bubbles: true })
+		new KeyboardEvent('keydown', { key: 's', ctrlKey: true, bubbles: true }),
 	)
 }
 
@@ -214,7 +214,7 @@ describe('NewCourseForm as a route', () => {
 		await router.push({ name: 'NewCourse' })
 		const wrapper = await mountForm(router, moderator)
 		expect(wrapper.find('[data-testid="new-course-fields"]').exists()).toBe(
-			true
+			true,
 		)
 		expect(wrapper.html()).toContain('New Course')
 	})
@@ -225,7 +225,7 @@ describe('NewCourseForm as a route', () => {
 		await router.push({ name: 'NewCourse' })
 		const wrapper = await mountForm(router, student)
 		expect(wrapper.find('[data-testid="new-course-fields"]').exists()).toBe(
-			false
+			false,
 		)
 		expect(wrapper.html()).toContain('not permitted')
 	})
@@ -246,7 +246,7 @@ describe('NewCourseForm as a route', () => {
 					.text()
 					.replace(/\(required\)|\*/g, '')
 					.replace(/\s+/g, ' ')
-					.trim()
+					.trim(),
 			)
 			.filter((text) => text !== '')
 		for (const label of FIELD_LABELS) {
@@ -294,7 +294,7 @@ describe('NewCourseForm as a route', () => {
 		await mountForm(router, moderator)
 
 		expect(createListResourceMock).toHaveBeenCalledWith(
-			expect.objectContaining({ cache: ['courses', 'mod@example.com'] })
+			expect.objectContaining({ cache: ['courses', 'mod@example.com'] }),
 		)
 	})
 
@@ -336,11 +336,13 @@ describe('NewCourseForm as a route', () => {
 		insertSubmit.mockImplementation(
 			(_doc: unknown, options: { onSuccess: (d: unknown) => void }) => {
 				options.onSuccess({ name: 'COURSE-0001' })
-			}
+			},
 		)
 		await wrapper.find('[data-testid="new-course-save"]').trigger('click')
 		await flushPromises()
 		expect(router.currentRoute.value.name).toBe('CourseDetail')
+		expect(router.currentRoute.value.hash).toBe('#editor')
+		expect(router.currentRoute.value.query).toEqual({ quickAddLesson: '1' })
 
 		router.back()
 		await flushPromises()

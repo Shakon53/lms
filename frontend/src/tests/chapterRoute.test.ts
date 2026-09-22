@@ -10,7 +10,12 @@ import { defineComponent, h, reactive } from 'vue'
 
 vi.stubGlobal('__', (text: string) => text)
 
-const { createResourceMock, passthrough } = vi.hoisted(() => {
+const {
+	createResourceMock,
+	createLessonSubmit,
+	addChapterSubmit,
+	passthrough,
+} = vi.hoisted(() => {
 	// @/utils pulls in plyr, which touches matchMedia at import time.
 	window.matchMedia ??= (() => ({
 		matches: false,
@@ -19,6 +24,8 @@ const { createResourceMock, passthrough } = vi.hoisted(() => {
 	})) as unknown as typeof window.matchMedia
 	return {
 		createResourceMock: vi.fn(),
+		createLessonSubmit: vi.fn(),
+		addChapterSubmit: vi.fn(),
 		passthrough: {
 			inheritAttrs: false,
 			template: `<div><slot name="icon" /><slot /></div>`,
@@ -107,11 +114,14 @@ const outlineResource = reactive({
 	fetch: vi.fn(),
 	reload: vi.fn(),
 })
-createResourceMock.mockImplementation((options: { url: string }) =>
-	options.url === 'lms.lms.utils.get_course_outline'
-		? outlineResource
-		: reactive({ loading: false, submit: vi.fn() })
-)
+createResourceMock.mockImplementation((options: { url: string }) => {
+	if (options.url === 'lms.lms.utils.get_course_outline') return outlineResource
+	if (options.url === 'lms.lms.api.create_lesson')
+		return reactive({ loading: false, submit: createLessonSubmit })
+	if (options.url === 'lms.lms.api.upsert_chapter')
+		return reactive({ loading: false, submit: addChapterSubmit })
+	return reactive({ loading: false, submit: vi.fn() })
+})
 
 // The real value TabbedDetailPage writes: it hashes the tab KEY, not its
 // label, so the course editor tab is `#editor` (CourseDetail.vue's tab list,
@@ -147,7 +157,7 @@ const mountOutlineAndOutlet = async (router: Router) => {
 				// CourseOutline reads $dialog from.
 				mocks: { __: (text: string) => text, $dialog: vi.fn() },
 			},
-		}
+		},
 	)
 	await flushPromises()
 	return wrapper
@@ -167,7 +177,7 @@ const nextNavigation = (router: Router): Promise<void> =>
 
 const clickAdd = async (
 	wrapper: ReturnType<typeof mount>,
-	router: Router
+	router: Router,
 ): Promise<void> => {
 	const add = wrapper
 		.findAll('button')
@@ -181,7 +191,7 @@ const clickAdd = async (
 
 const dismissDialog = async (
 	wrapper: ReturnType<typeof mount>,
-	router: Router
+	router: Router,
 ): Promise<void> => {
 	const navigated = nextNavigation(router)
 	wrapper.findComponent({ name: 'Dialog' }).vm.$emit('update:open', false)
@@ -191,6 +201,9 @@ const dismissDialog = async (
 
 describe('the chapter route', () => {
 	beforeEach(() => {
+		outlineResource.data = []
+		createLessonSubmit.mockReset()
+		addChapterSubmit.mockReset()
 		Object.defineProperty(window, 'innerWidth', {
 			value: 1024,
 			writable: true,
@@ -233,7 +246,7 @@ describe('the chapter route', () => {
 		expect(router.resolve('/courses/COURSE-1').name).toBe('CourseDetail')
 		expect(router.resolve('/courses/COURSE-1/learn/1-2').name).toBe('Lesson')
 		expect(router.resolve('/courses/COURSE-1/certification').name).toBe(
-			'CourseCertification'
+			'CourseCertification',
 		)
 	})
 
@@ -318,5 +331,62 @@ describe('the chapter route', () => {
 		expect(router.currentRoute.value.params.chapterName).toBe('CHAPTER-9')
 		expect(router.currentRoute.value.hash).toBe(COURSE_TAB)
 		outlineResource.data = []
+	})
+
+	it('creates a default section before the first quick lesson', async () => {
+		const router = makeRouter()
+		await router.push({
+			name: 'CourseDetail',
+			params: { courseName: 'COURSE-1' },
+			hash: COURSE_TAB,
+		})
+		const wrapper = await mountOutlineAndOutlet(router)
+		const outline = wrapper.findComponent(CourseOutline)
+
+		;(
+			outline.vm as unknown as { createQuickLesson: () => void }
+		).createQuickLesson()
+		expect(addChapterSubmit).toHaveBeenCalledOnce()
+
+		const options = addChapterSubmit.mock.calls[0][1]
+		options.onSuccess({
+			name: 'AUTO-CHAPTER',
+			title: 'Section 1',
+			idx: 1,
+			lessons: [],
+		})
+		expect(createLessonSubmit).toHaveBeenCalledWith(
+			{ chapter: 'AUTO-CHAPTER' },
+			expect.any(Object),
+		)
+	})
+
+	it('adds a quick lesson directly to an existing regular chapter', async () => {
+		outlineResource.data = [
+			{
+				name: 'CHAPTER-1',
+				title: 'Section 1',
+				idx: 1,
+				is_scorm_package: 0,
+				lessons: [],
+			},
+		]
+		const router = makeRouter()
+		await router.push({
+			name: 'CourseDetail',
+			params: { courseName: 'COURSE-1' },
+			hash: COURSE_TAB,
+		})
+		const wrapper = await mountOutlineAndOutlet(router)
+		const outline = wrapper.findComponent(CourseOutline)
+
+		;(
+			outline.vm as unknown as { createQuickLesson: () => void }
+		).createQuickLesson()
+		expect(addChapterSubmit).not.toHaveBeenCalled()
+		expect(createLessonSubmit).toHaveBeenCalledWith(
+			{ chapter: 'CHAPTER-1' },
+			expect.any(Object),
+		)
 	})
 })

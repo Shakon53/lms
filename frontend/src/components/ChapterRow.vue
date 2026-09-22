@@ -36,6 +36,27 @@
 				</div>
 			</div>
 			<div class="flex ms-3 items-center gap-x-4 shrink-0">
+				<span
+					v-if="allowEdit && !chapter.is_scorm_package"
+					role="button"
+					tabindex="0"
+					:aria-busy="creatingLesson"
+					class="inline-flex min-h-8 items-center gap-1 rounded px-2 text-p-sm-medium text-ink-gray-7 hover:bg-surface-gray-2 hover:text-ink-gray-9 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+					:class="creatingLesson && 'pointer-events-none opacity-60'"
+					@click.stop.prevent="addLesson"
+					@keydown.enter.stop.prevent="addLesson"
+					@keydown.space.stop.prevent="addLesson"
+				>
+					<span
+						class="size-3.5"
+						:class="
+							creatingLesson
+								? 'lucide-loader-circle animate-spin'
+								: 'lucide-plus'
+						"
+					/>
+					{{ __('Lesson') }}
+				</span>
 				<!-- Lesson count in the corner (student-view style). When the chapter
 				is editable it gives way to the delete action on hover. -->
 				<span
@@ -131,20 +152,12 @@
 					</div>
 				</template>
 			</Draggable>
-			<div v-if="allowEdit" class="flex mt-2 mb-4 ps-8">
-				<Button :loading="creatingLesson" @click="addLesson">
-					<template #prefix>
-						<span class="lucide-plus size-4" />
-					</template>
-					{{ __('Add Lesson') }}
-				</Button>
-			</div>
 		</DisclosurePanel>
 	</Disclosure>
 </template>
 
 <script setup lang="ts">
-import { Button, TextInput, Tooltip, toast } from 'frappe-ui'
+import { TextInput, Tooltip, toast } from 'frappe-ui'
 import { computed, inject, nextTick, ref, watch } from 'vue'
 import Draggable from 'vuedraggable'
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
@@ -176,7 +189,7 @@ const props = withDefaults(
 		editorLinks: false,
 		selectedLessonNumber: '',
 		creatingLesson: false,
-	}
+	},
 )
 
 const emit = defineEmits<{
@@ -243,8 +256,8 @@ const defaultOpen = computed<boolean>(() => {
 const isScormChapterComplete = computed<boolean>(() =>
 	Boolean(
 		props.chapter.lessons?.length &&
-			props.chapter.lessons.every((l) => l.is_complete)
-	)
+		props.chapter.lessons.every((l) => l.is_complete),
+	),
 )
 
 function isActiveLesson(lessonNumber: string): boolean {
@@ -282,6 +295,7 @@ function onLessonClick(lesson: OutlineLesson) {
 }
 
 function addLesson() {
+	if (props.creatingLesson) return
 	emit('create-lesson', {
 		chapter: props.chapter,
 		lessonIdx: (props.chapter.lessons?.length ?? 0) + 1,

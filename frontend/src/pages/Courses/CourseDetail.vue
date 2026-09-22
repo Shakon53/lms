@@ -23,74 +23,90 @@
 					side="bottom"
 					align="end"
 				/>
-				<Tooltip
-					v-if="!courseFormRef.isDirty"
-					:text="__('No changes to save')"
-					:hoverDelay="0.1"
+				<ShortcutTooltip
+					v-if="courseFormRef.isDirty"
+					:label="__('Save')"
+					combo="Mod+S"
 				>
-					<HeaderButton :label="__('Save')" variant="solid" disabled />
-				</Tooltip>
-				<ShortcutTooltip v-else :label="__('Save')" combo="Mod+S">
 					<HeaderButton
 						:label="__('Save')"
-						variant="solid"
+						variant="outline"
 						@click="courseFormRef.submitCourse()"
 					/>
 				</ShortcutTooltip>
+				<HeaderButton
+					:label="
+						courseFormRef.isDirty ? __('Save and add lesson') : __('Add lesson')
+					"
+					variant="solid"
+					@click="saveAndAddLesson"
+				/>
 			</template>
-			<template v-if="tab?.key === 'editor' && editorSelected">
-				<Tooltip
-					v-if="courseEditorRef?.lessonHasVideo"
-					:text="__('Video Statistics')"
+			<template v-if="tab?.key === 'editor'">
+				<Button
+					variant="solid"
+					:loading="courseEditorRef?.quickAddLoading"
+					@click="courseEditorRef?.addLesson()"
 				>
-					<Button
-						variant="ghost"
-						:label="__('Video Statistics')"
-						:class="isMobile ? '!size-9' : ''"
-						@click="courseEditorRef?.openVideoStats()"
+					<template #prefix>
+						<span class="lucide-plus size-4" />
+					</template>
+					{{ __('Add lesson') }}
+				</Button>
+				<template v-if="editorSelected">
+					<Tooltip
+						v-if="courseEditorRef?.lessonHasVideo"
+						:text="__('Video Statistics')"
 					>
-						<template #icon>
-							<span class="lucide-trending-up size-4" />
-						</template>
-					</Button>
-				</Tooltip>
-				<Tooltip v-if="!isMobile" :text="__('How to edit a lesson')">
-					<Button
-						variant="ghost"
-						class="text-p-base-medium"
-						:label="__('How to edit a lesson')"
-						@click="showLessonHelp = true"
-					>
-						<template #icon>
-							<span class="lucide-info size-4" />
-						</template>
-					</Button>
-				</Tooltip>
-				<router-link
-					:to="{
-						name: 'Lesson',
-						params: {
-							courseName: props.courseName,
-							chapterNumber: editorSelected.chapterNumber,
-							lessonNumber: editorSelected.lessonNumber,
-						},
-						query: { studentView: 1 },
-					}"
-				>
-					<Tooltip v-if="isMobile" :text="__('Student View')">
-						<Button variant="outline" class="!size-9">
+						<Button
+							variant="ghost"
+							:label="__('Video Statistics')"
+							:class="isMobile ? '!size-9' : ''"
+							@click="courseEditorRef?.openVideoStats()"
+						>
 							<template #icon>
-								<span class="lucide-eye size-4" />
+								<span class="lucide-trending-up size-4" />
 							</template>
 						</Button>
 					</Tooltip>
-					<Button v-else variant="outline">
-						<template #prefix>
-							<span class="lucide-eye size-4" />
-						</template>
-						{{ __('Student View') }}
-					</Button>
-				</router-link>
+					<Tooltip v-if="!isMobile" :text="__('How to edit a lesson')">
+						<Button
+							variant="ghost"
+							class="text-p-base-medium"
+							:label="__('How to edit a lesson')"
+							@click="showLessonHelp = true"
+						>
+							<template #icon>
+								<span class="lucide-info size-4" />
+							</template>
+						</Button>
+					</Tooltip>
+					<router-link
+						:to="{
+							name: 'Lesson',
+							params: {
+								courseName: props.courseName,
+								chapterNumber: editorSelected.chapterNumber,
+								lessonNumber: editorSelected.lessonNumber,
+							},
+							query: { studentView: 1 },
+						}"
+					>
+						<Tooltip v-if="isMobile" :text="__('Student View')">
+							<Button variant="outline" class="!size-9">
+								<template #icon>
+									<span class="lucide-eye size-4" />
+								</template>
+							</Button>
+						</Tooltip>
+						<Button v-else variant="outline">
+							<template #prefix>
+								<span class="lucide-eye size-4" />
+							</template>
+							{{ __('Student View') }}
+						</Button>
+					</router-link>
+				</template>
 			</template>
 			<Button
 				v-if="tab?.key === 'dashboard' && course.data && isMobile"
@@ -115,7 +131,7 @@
 			</Button>
 			<Button
 				v-if="tab?.key === 'settings' && user.data?.is_moderator && !isMobile"
-				:variant="course.data?.published ? 'outline' : 'solid'"
+				variant="outline"
 				:theme="course.data?.published ? 'red' : 'gray'"
 				:loading="publishToggle.loading"
 				@click="togglePublishCourse"
@@ -271,13 +287,13 @@ type CourseMenuItem = {
 }
 type CourseFormApi = {
 	isDirty: boolean
-	submitCourse: () => void
+	submitCourse: (onSuccess?: () => void) => void
 	courseMenu: CourseMenuItem[]
 }
 const page = useTemplateRef('page')
 
 const courseFormRef = computed<CourseFormApi | null>(
-	() => (page.value?.instanceFor('settings') ?? null) as CourseFormApi | null
+	() => (page.value?.instanceFor('settings') ?? null) as CourseFormApi | null,
 )
 
 type CourseEditorApi = {
@@ -286,6 +302,8 @@ type CourseEditorApi = {
 	lessonHasVideo: ComputedRef<boolean>
 	openVideoStats: () => void
 	openAddChapter: () => void
+	addLesson: () => void
+	quickAddLoading: boolean
 	lessonIndex: ComputedRef<number>
 	lessonTotal: ComputedRef<number>
 	hasPrev: ComputedRef<boolean>
@@ -308,7 +326,9 @@ const publishToggle = createResource({
 	},
 	onSuccess() {
 		toast.success(
-			course.data?.published ? __('Course unpublished') : __('Course published')
+			course.data?.published
+				? __('Course unpublished')
+				: __('Course published'),
 		)
 		course.reload()
 	},
@@ -316,7 +336,7 @@ const publishToggle = createResource({
 		const msg =
 			typeof err === 'string'
 				? err
-				: err.messages?.[0] ?? __('Could not update publish status')
+				: (err.messages?.[0] ?? __('Could not update publish status'))
 		toast.error(msg)
 	},
 }) as Resource<unknown>
@@ -355,6 +375,24 @@ function openEnrollForm() {
 	})
 }
 
+function queueQuickLesson() {
+	const { editLesson, ...query } = route.query
+	router.push({
+		name: 'CourseDetail',
+		params: { courseName: props.courseName },
+		hash: '#editor',
+		query: { ...query, quickAddLesson: '1' },
+	})
+}
+
+function saveAndAddLesson() {
+	if (courseFormRef.value?.isDirty) {
+		courseFormRef.value.submitCourse(queueQuickLesson)
+		return
+	}
+	queueQuickLesson()
+}
+
 const props = defineProps<{
 	courseName: string
 }>()
@@ -390,8 +428,8 @@ const tabs = computed<DetailTab[]>(() => [
 	},
 	{
 		key: 'editor',
-		label: __('Course editor'),
-		shortLabel: __('Editor'),
+		label: __('Lessons'),
+		shortLabel: __('Lessons'),
 		component: markRaw(CourseEditor),
 		icon: 'lucide-book-open',
 		when: isAdmin.value,
@@ -410,7 +448,7 @@ watch(
 	() => props.courseName,
 	() => {
 		course.reload()
-	}
+	},
 )
 
 watch(course, () => {

@@ -168,7 +168,7 @@ watch(
 		nextTick(() => {
 			applyingServerData = false
 		})
-	}
+	},
 )
 
 const updateCourseData = (): void => {
@@ -201,7 +201,7 @@ const updateCourseData = (): void => {
 	}
 }
 
-const submitCourse = (): void => {
+const submitCourse = (onSuccess?: () => void): void => {
 	const error = validateForm()
 	if (error) {
 		toast.error(error)
@@ -209,10 +209,12 @@ const submitCourse = (): void => {
 		return
 	}
 	lastAutoSaveError = null
-	updateCourse()
+	updateCourse({ onSuccess })
 }
 
-const updateCourse = (opts: { silent?: boolean } = {}): void => {
+const updateCourse = (
+	opts: { silent?: boolean; onSuccess?: () => void } = {},
+): void => {
 	// Drop `modified` from the payload: this form does an intentional whole-doc
 	// last-write-wins save, and sending a stale `modified` trips Frappe's
 	// timestamp guard when the course was touched elsewhere (publish toggle,
@@ -234,15 +236,17 @@ const updateCourse = (opts: { silent?: boolean } = {}): void => {
 				// Refresh the shared course resource so sibling tabs (Overview,
 				// Dashboard) reflect the saved changes without a page reload.
 				props.course.reload()
+				opts.onSuccess?.()
 			},
 			onError(err: { messages?: string[] } | string) {
-				const msg = typeof err === 'string' ? err : err.messages?.[0] ?? 'Error'
+				const msg =
+					typeof err === 'string' ? err : (err.messages?.[0] ?? 'Error')
 				// Autosave failures stay quiet; the orange "unsaved" badge remains
 				// (isDirty is untouched) so the change isn't silently lost.
 				if (!opts.silent) toast.error(msg)
 				console.error(err)
 			},
-		}
+		},
 	)
 }
 
@@ -257,13 +261,10 @@ const deleteCourse = createResource({
 		// immediately so navigating back cannot briefly (or, after a fast refetch
 		// racing the server commit, indefinitely) resurrect the course card.
 		const deletedName = courseResource.doc?.name
-		const cachedCourses = getCachedListResource([
-			'courses',
-			user.data?.name,
-		])
+		const cachedCourses = getCachedListResource(['courses', user.data?.name])
 		if (deletedName) {
-			cachedCourses?.setData(
-				(rows = []) => rows.filter((row) => row.name !== deletedName)
+			cachedCourses?.setData((rows = []) =>
+				rows.filter((row) => row.name !== deletedName),
 			)
 		}
 		// Land on the creator's "Created" courses. Pick another course to edit.
@@ -277,7 +278,7 @@ const deleteCourse = createResource({
 	},
 	onError(err: { messages?: string[] } | string) {
 		toast.error(
-			typeof err === 'string' ? err : err.messages?.[0] ?? __('Error')
+			typeof err === 'string' ? err : (err.messages?.[0] ?? __('Error')),
 		)
 	},
 }) as Resource<unknown>
@@ -286,7 +287,7 @@ const trashCourse = (): void => {
 	$dialog({
 		title: __('Delete Course'),
 		message: __(
-			'Deleting the course will also delete all its chapters and lessons. Are you sure you want to delete this course?'
+			'Deleting the course will also delete all its chapters and lessons. Are you sure you want to delete this course?',
 		),
 		actions: [
 			{
@@ -319,7 +320,7 @@ const courseMenu = computed<CourseMenuItem[]>(() => [
 const checkPermission = (): void => {
 	if (user.data?.is_moderator) return
 	const isInstructor = instructors.value?.some(
-		(i: string) => i == user.data?.name
+		(i: string) => i == user.data?.name,
 	)
 	if (!isInstructor) router.push({ name: 'Courses' })
 }

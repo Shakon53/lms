@@ -28,54 +28,61 @@
 				/>
 			</div>
 		</div>
-		<MultiLink
-			v-model="relatedCourses"
-			doctype="LMS Course"
-			:filters="{ name: ['!=', resource.doc?.name], published: 1 }"
-			:label="__('Related Courses')"
-			:placeholder="__('Select related courses')"
-			:emptyText="__('No other published courses available')"
-			variant="outline"
-			@update:modelValue="markDirty()"
-		/>
 	</section>
 
-	<section class="space-y-5 border-t pt-6">
-		<div>
-			<div class="text-base-semibold text-ink-gray-9">
-				{{ __('Meta Tags') }}
+	<CollapsibleSection
+		:label="__('Advanced settings')"
+		:defaultOpen="false"
+		class="border-t"
+	>
+		<div class="space-y-5">
+			<MultiLink
+				v-model="relatedCourses"
+				doctype="LMS Course"
+				:filters="{ name: ['!=', resource.doc?.name], published: 1 }"
+				:label="__('Related Courses')"
+				:placeholder="__('Select related courses')"
+				:emptyText="__('No other published courses available')"
+				variant="outline"
+				@update:modelValue="markDirty()"
+			/>
+			<div class="border-t pt-5">
+				<div class="text-base-semibold text-ink-gray-9">
+					{{ __('Meta Tags') }}
+				</div>
+				<div class="mt-1 text-p-sm text-ink-gray-6">
+					{{
+						__(
+							'These tags help search engines describe and rank your course in results.',
+						)
+					}}
+				</div>
 			</div>
-			<div class="mt-1 text-p-sm text-ink-gray-6">
-				{{
-					__(
-						'These tags help search engines describe and rank your course in results.'
-					)
-				}}
-			</div>
+			<FormControl
+				v-model="meta.description"
+				:label="__('Meta description')"
+				type="textarea"
+				:placeholder="__('A short summary of the course for search results.')"
+				variant="outline"
+				@input="markDirty()"
+			/>
+			<FormControl
+				v-model="meta.keywords"
+				:label="__('Meta keywords')"
+				type="textarea"
+				:placeholder="__('Comma separated keywords for SEO')"
+				variant="outline"
+				@input="markDirty()"
+			/>
 		</div>
-		<FormControl
-			v-model="meta.description"
-			:label="__('Meta description')"
-			type="textarea"
-			:placeholder="__('A short summary of the course for search results.')"
-			variant="outline"
-			@input="markDirty()"
-		/>
-		<FormControl
-			v-model="meta.keywords"
-			:label="__('Meta keywords')"
-			type="textarea"
-			:placeholder="__('Comma separated keywords for SEO')"
-			variant="outline"
-			@input="markDirty()"
-		/>
-	</section>
+	</CollapsibleSection>
 </template>
 
 <script setup lang="ts">
 import { FormControl } from 'frappe-ui'
 import { computed, inject, useId } from 'vue'
 import MultiLink from '@/components/Controls/MultiLink.vue'
+import CollapsibleSection from '@/components/CollapsibleSection.vue'
 import type { CourseFormContext } from '@/types'
 import RichTextEditor from '@/components/RichTextEditor.vue'
 import { InputLabel } from '@/components/Form/labeling'

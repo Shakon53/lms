@@ -287,7 +287,7 @@ watch(
 				})
 			}
 		}
-	}
+	},
 )
 
 watch(
@@ -295,7 +295,7 @@ watch(
 	(name) => {
 		if (name) outline.fetch()
 	},
-	{ immediate: true }
+	{ immediate: true },
 )
 
 // React to a deep-link change while the editor tab is already open.
@@ -306,7 +306,7 @@ watch(
 	(number) => {
 		if (!number) return
 		setSelectedFromNumber(number)
-	}
+	},
 )
 
 // ?lessonMode is a dead param: student view used to be a mode of this editor
@@ -340,7 +340,7 @@ watch(
 			query: { studentView: 1 },
 		})
 	},
-	{ immediate: true }
+	{ immediate: true },
 )
 
 const lessonFormRef = ref(null)
@@ -355,22 +355,22 @@ const isDirty = computed(() => Boolean(lessonFormRef.value?.isDirty))
 // loaded, rather than from the LessonForm child. Otherwise the buttons
 // flicker out on every hop while the child remounts and refetches.
 const flatLessonNumbers = computed(() =>
-	(outline.data ?? []).flatMap((c) => c.lessons?.map((l) => l.number) ?? [])
+	(outline.data ?? []).flatMap((c) => c.lessons?.map((l) => l.number) ?? []),
 )
 const selectedIndex = computed(() =>
 	selected.value?.number
 		? flatLessonNumbers.value.indexOf(selected.value.number)
-		: -1
+		: -1,
 )
 const hasPrev = computed(() => selectedIndex.value > 0)
 const hasNext = computed(
 	() =>
 		selectedIndex.value >= 0 &&
-		selectedIndex.value < flatLessonNumbers.value.length - 1
+		selectedIndex.value < flatLessonNumbers.value.length - 1,
 )
 const lessonTotal = computed(() => flatLessonNumbers.value.length)
 const lessonIndex = computed(() =>
-	selectedIndex.value >= 0 ? selectedIndex.value + 1 : 0
+	selectedIndex.value >= 0 ? selectedIndex.value + 1 : 0,
 )
 
 function selectByNumber(number) {
@@ -390,7 +390,7 @@ function openChapters() {
 }
 
 const lessonHasVideo = computed(() =>
-	Boolean(lessonFormRef.value?.lessonHasVideo?.())
+	Boolean(lessonFormRef.value?.lessonHasVideo?.()),
 )
 const showStats = ref(false)
 const statsLessonName = computed(() => lessonFormRef.value?.lessonName?.())
@@ -404,12 +404,41 @@ function openAddChapter() {
 	courseOutlineRef.value?.openChapterForm?.(null)
 }
 
+function addLesson() {
+	courseOutlineRef.value?.createQuickLesson?.()
+}
+
+const quickAddLoading = computed(() =>
+	Boolean(courseOutlineRef.value?.quickCreateLoading),
+)
+
+let handlingQuickAdd = false
+watch(
+	[
+		() => route.query.quickAddLesson,
+		() => outline.data,
+		() => courseOutlineRef.value,
+	],
+	async ([requested, chapters, outlineComponent]) => {
+		if (requested !== '1' || handlingQuickAdd || !chapters || !outlineComponent)
+			return
+		handlingQuickAdd = true
+		const { quickAddLesson, ...query } = route.query
+		await router.replace({ query, hash: route.hash || '#editor' })
+		outlineComponent.createQuickLesson?.()
+		handlingQuickAdd = false
+	},
+	{ immediate: true },
+)
+
 defineExpose({
 	saveSelectedLesson,
 	isDirty,
 	lessonHasVideo,
 	openVideoStats,
 	openAddChapter,
+	addLesson,
+	quickAddLoading,
 	lessonIndex,
 	lessonTotal,
 	hasPrev,

@@ -75,6 +75,19 @@ beforeEach(() => {
 })
 
 describe('ChapterRow inline rename', () => {
+	it('keeps a visible lesson action on the collapsed chapter row', async () => {
+		const wrapper = mountRow()
+		const addLesson = wrapper
+			.findAll('[role="button"]')
+			.find((button) => button.text().includes('Lesson'))
+
+		expect(addLesson).toBeDefined()
+		await addLesson!.trigger('click')
+		expect(wrapper.emitted('create-lesson')?.[0]).toEqual([
+			{ chapter, lessonIdx: 2 },
+		])
+	})
+
 	it('commits on Enter without toggling the chapter disclosure', async () => {
 		const wrapper = mountRow()
 
