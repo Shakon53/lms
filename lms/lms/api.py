@@ -32,6 +32,7 @@ from frappe.utils import (
 from frappe.utils.response import Response
 from pypika import functions as fn
 
+from lms.branding import get_brand_name
 from lms.lms.course_import_export import export_course_zip, import_course_zip
 from lms.lms.doctype.course_lesson.course_lesson import (
 	cleanup_lesson_backreferences,
@@ -461,7 +462,11 @@ def get_branding():
 	settings = frappe._dict()
 
 	for field in fields:
-		value = frappe.get_cached_value("Website Settings", None, field)
+		value = (
+			get_brand_name()
+			if field == "app_name"
+			else frappe.get_cached_value("Website Settings", None, field)
+		)
 		if field in image_fields and value:
 			file_info = get_file_info(value)
 			settings.update({field: json.loads(json.dumps(file_info))})
@@ -2336,7 +2341,7 @@ def get_progress_distribution(progressList: list):
 @frappe.whitelist(allow_guest=True)
 def get_pwa_manifest():
 	"""Web app manifest for installing the LMS as a PWA."""
-	title = frappe.db.get_single_value("Website Settings", "app_name") or "Frappe Learning"
+	title = get_brand_name()
 	route = get_lms_route()
 
 	# `display` was absent, so it defaulted to "browser" and the installed app

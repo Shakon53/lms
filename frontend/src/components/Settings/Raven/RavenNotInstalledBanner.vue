@@ -40,7 +40,7 @@ const body = computed<string>(() =>
 	props.missing === 'raven'
 		? __('Install the Raven app to sync workspace and channel membership.')
 		: __(
-				'Install the raven_integration app to manage Raven membership from Learning.'
+				'Install the raven_integration app to manage Raven membership from Nova LMS.'
 		  )
 )
 </script>

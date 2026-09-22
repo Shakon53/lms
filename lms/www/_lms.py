@@ -8,6 +8,7 @@ from frappe.utils.data import escape_html
 from frappe.utils.jinja_globals import is_rtl
 from frappe.utils.telemetry import capture
 
+from lms.branding import get_brand_name
 from lms.lms.utils import get_lms_path, get_lms_route
 
 no_cache = 1
@@ -20,7 +21,7 @@ def get_context():
 
 	app_path = frappe.form_dict.get("app_path")
 	favicon = frappe.db.get_single_value("Website Settings", "favicon") or "/assets/lms/frontend/favicon.png"
-	title = frappe.db.get_single_value("Website Settings", "app_name") or "Frappe Learning"
+	title = get_brand_name()
 
 	context.meta = get_meta(app_path, title, favicon)
 	context.title = title

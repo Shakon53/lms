@@ -53,7 +53,7 @@
 					<span class="lucide-messages-square size-7.5 text-ink-gray-5" />
 					<div class="flex flex-col items-center gap-1">
 						<span class="text-center text-p-lg-medium text-ink-gray-8">
-							{{ __('Connect Raven to Frappe Learning') }}
+							{{ __('Connect Raven to Nova LMS') }}
 						</span>
 						<span class="text-center text-p-base text-ink-gray-6">
 							{{
