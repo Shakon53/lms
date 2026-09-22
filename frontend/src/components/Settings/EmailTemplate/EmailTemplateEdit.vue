@@ -105,10 +105,10 @@ const template = reactive({
 })
 
 const htmlPlaceholder = __(
-	'<p>Dear {{ member_name }},</p>\n\n<p>You have been enrolled in our upcoming batch {{ batch_name }}.</p>\n\n<p>Thanks,</p>\n<p>Nova LMS</p>'
+	'<p>Dear {{ member_name }},</p>\n\n<p>You have been enrolled in our upcoming batch {{ batch_name }}.</p>\n\n<p>Thanks,</p>\n<p>YU-LMS</p>'
 )
 const richPlaceholder = __(
-	'Dear {{ member_name }},\n\nYou have been enrolled in our upcoming batch {{ batch_name }}.\n\nThanks,\nNova LMS'
+	'Dear {{ member_name }},\n\nYou have been enrolled in our upcoming batch {{ batch_name }}.\n\nThanks,\nYU-LMS'
 )
 
 const templates = createListResource({

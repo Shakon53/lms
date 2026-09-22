@@ -59,7 +59,7 @@ const steps = [
 	{
 		key: 'usage_context',
 		type: 'tags',
-		title: 'Where will you be using Nova LMS?',
+		title: 'Where will you be using YU-LMS?',
 		subtitle: 'hint',
 		options: [
 			{ label: 'School', value: 'School' },
@@ -116,7 +116,7 @@ beforeEach(() => {
 describe('PersonaCard', () => {
 	it('renders the first step and its options', () => {
 		const wrapper = mountCard()
-		expect(wrapper.text()).toContain('Where will you be using Nova LMS?')
+		expect(wrapper.text()).toContain('Where will you be using YU-LMS?')
 		expect(tag(wrapper, 'School')).toBeTruthy()
 		expect(tag(wrapper, 'Company')).toBeTruthy()
 		// No back chevron on the first step.

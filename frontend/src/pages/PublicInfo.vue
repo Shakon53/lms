@@ -14,7 +14,7 @@
 					>
 						<span class="lucide-graduation-cap size-5" />
 					</span>
-					<span>{{ brand.name || __('Nova LMS') }}</span>
+					<span>{{ brand.name || __('YU-LMS') }}</span>
 				</router-link>
 
 				<nav :aria-label="__('Public navigation')" class="hidden gap-1 sm:flex">
@@ -100,7 +100,7 @@
 			<div
 				class="mx-auto flex max-w-6xl flex-col gap-4 px-5 py-6 text-sm text-ink-gray-6 sm:flex-row sm:items-center sm:justify-between"
 			>
-				<p>© {{ new Date().getFullYear() }} {{ brand.name || __('Nova LMS') }}</p>
+				<p>© {{ new Date().getFullYear() }} {{ brand.name || __('YU-LMS') }}</p>
 				<nav :aria-label="__('Legal')" class="flex flex-wrap gap-x-5 gap-y-2">
 					<router-link :to="{ name: 'Privacy' }" class="hover:text-ink-gray-9">
 						{{ __('Privacy') }}

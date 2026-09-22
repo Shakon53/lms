@@ -1,8 +1,8 @@
 import frappe
 
 
-DEFAULT_BRAND_NAME = "Nova LMS"
-LEGACY_BRAND_NAMES = {None, "", "Frappe", "Learning", "Frappe Learning"}
+DEFAULT_BRAND_NAME = "YU-LMS"
+LEGACY_BRAND_NAMES = {None, "", "Frappe", "Learning", "Frappe Learning", "Nova LMS"}
 
 
 def get_brand_name() -> str:

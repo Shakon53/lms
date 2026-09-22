@@ -6,19 +6,21 @@
 		fill="none"
 		xmlns="http://www.w3.org/2000/svg"
 		role="img"
-		aria-label="Nova LMS"
+		aria-label="YU-LMS"
 	>
-		<rect width="80" height="80" rx="20" fill="#4F46E5" />
+		<rect width="80" height="80" rx="20" fill="#1D4ED8" />
 		<path
-			d="M20 59V29L55 59V29"
+			d="M14 23L28 38L42 23M28 38V58"
 			stroke="white"
-			stroke-width="8"
+			stroke-width="7"
 			stroke-linecap="round"
 			stroke-linejoin="round"
 		/>
 		<path
-			d="M59 10.5L61.2 16.8L67.5 19L61.2 21.2L59 27.5L56.8 21.2L50.5 19L56.8 16.8L59 10.5Z"
-			fill="#67E8F9"
+			d="M47 23V45C47 53.3 51.5 58 58 58C64.5 58 69 53.3 69 45V23"
+			stroke="#A5F3FC"
+			stroke-width="7"
+			stroke-linecap="round"
 		/>
 	</svg>
 </template>

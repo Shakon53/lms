@@ -3,11 +3,11 @@ import frappe
 from . import __version__ as app_version
 
 app_name = "frappe_lms"
-app_title = "Nova LMS"
+app_title = "YU-LMS"
 app_publisher = "Frappe"
 app_description = "Modern Learning Management System"
-app_icon_url = "/assets/lms/frontend/learning.svg"
-app_icon_title = "Nova LMS"
+app_icon_url = "/assets/lms/frontend/yu-lms.svg"
+app_icon_title = "YU-LMS"
 app_icon_route = "/lms"
 app_color = "grey"
 app_email = "jannat@frappe.io"
@@ -281,8 +281,8 @@ get_site_info = "lms.activation.get_site_info"
 add_to_apps_screen = [
 	{
 		"name": "lms",
-		"logo": "/assets/lms/frontend/learning.svg",
-		"title": "Nova LMS",
+		"logo": "/assets/lms/frontend/yu-lms.svg",
+		"title": "YU-LMS",
 		"route": f"/{get_lms_path()}",
 		"has_permission": "lms.lms.api.check_app_permission",
 	}

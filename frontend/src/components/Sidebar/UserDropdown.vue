@@ -35,7 +35,7 @@
 							>
 								{{ branding.data?.app_name }}
 							</span>
-							<span v-else> Nova LMS </span>
+							<span v-else> YU-LMS </span>
 						</div>
 						<div
 							v-if="userResource.data"

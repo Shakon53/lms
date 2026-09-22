@@ -122,7 +122,7 @@ TRIGGERS = [
 def get_provider() -> dict:
 	return {
 		"name": "LMS",
-		"label": "Nova LMS",
+		"label": "YU-LMS",
 		"rule_types": RULE_TYPES,
 		"evaluate": evaluate,
 		"triggers": TRIGGERS,

@@ -49,7 +49,7 @@ const steps = computed(() => [
 	{
 		key: 'discovery_source',
 		type: 'tags',
-		title: __('How did you hear about Nova LMS?'),
+		title: __('How did you hear about YU-LMS?'),
 		subtitle: PERSONALISE_HINT,
 		options: [
 			{
@@ -77,7 +77,7 @@ const steps = computed(() => [
 	{
 		key: 'usage_context',
 		type: 'tags',
-		title: __('Where will you be using Nova LMS?'),
+		title: __('Where will you be using YU-LMS?'),
 		subtitle: PERSONALISE_HINT,
 		options: [
 			{ label: __('School'), value: 'School' },

@@ -201,7 +201,7 @@
 							"
 						/>
 					</Tooltip>
-					<Tooltip :text="__('Powered by Nova LMS')">
+					<Tooltip :text="__('Powered by YU-LMS')">
 						<span
 							class="lucide-zap size-4 text-ink-gray-7 cursor-pointer"
 							@click="redirectToWebsite()"
@@ -232,7 +232,7 @@
 			v-model="showHelpModal"
 			v-model:articles="articles"
 			appName="learning"
-			title="Nova LMS"
+			title="YU-LMS"
 			:logo="LMSLogo"
 			:afterSkip="(step) => capture('onboarding_step_skipped_' + step)"
 			:afterSkipAll="() => capture('onboarding_steps_skipped')"

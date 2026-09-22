@@ -1,7 +1,7 @@
 <template>
 	<Dialog v-model:open="showDialog">
 		<template #title>
-			<h2 class="text-lg-bold">{{ __('Install Nova LMS') }}</h2>
+			<h2 class="text-lg-bold">{{ __('Install YU-LMS') }}</h2>
 		</template>
 		<template #default>
 			<p>
@@ -29,7 +29,7 @@
 					class="mb-1 flex flex-row items-center justify-between px-3 text-center"
 				>
 					<span class="text-base-bold text-ink-gray-9">
-						{{ __('Install Nova LMS') }}
+						{{ __('Install YU-LMS') }}
 					</span>
 					<span class="inline-flex items-baseline">
 						<button
