@@ -6,7 +6,7 @@ app_name = "frappe_lms"
 app_title = "YU-LMS"
 app_publisher = "Frappe"
 app_description = "Modern Learning Management System"
-app_icon_url = "/assets/lms/frontend/yu-lms.svg"
+app_icon_url = "/assets/lms/frontend/yu-lms-mark.svg"
 app_icon_title = "YU-LMS"
 app_icon_route = "/lms"
 app_color = "grey"
@@ -281,7 +281,7 @@ get_site_info = "lms.activation.get_site_info"
 add_to_apps_screen = [
 	{
 		"name": "lms",
-		"logo": "/assets/lms/frontend/yu-lms.svg",
+		"logo": "/assets/lms/frontend/yu-lms-mark.svg",
 		"title": "YU-LMS",
 		"route": f"/{get_lms_path()}",
 		"has_permission": "lms.lms.api.check_app_permission",

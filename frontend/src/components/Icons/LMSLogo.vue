@@ -8,18 +8,18 @@
 		role="img"
 		aria-label="YU-LMS"
 	>
-		<rect width="80" height="80" rx="20" fill="#1D4ED8" />
+		<rect x="1" y="1" width="78" height="78" rx="19" fill="#242424" stroke="#3F3F46" stroke-width="2" />
 		<path
-			d="M14 23L28 38L42 23M28 38V58"
-			stroke="white"
-			stroke-width="7"
+			d="M16 24L28 37L40 24M28 37V56"
+			stroke="#F4F4F5"
+			stroke-width="6"
 			stroke-linecap="round"
 			stroke-linejoin="round"
 		/>
 		<path
-			d="M47 23V45C47 53.3 51.5 58 58 58C64.5 58 69 53.3 69 45V23"
-			stroke="#A5F3FC"
-			stroke-width="7"
+			d="M46 24V43C46 51.5 50.3 56 57.5 56C64.7 56 69 51.5 69 43V24"
+			stroke="#34D399"
+			stroke-width="6"
 			stroke-linecap="round"
 		/>
 	</svg>
