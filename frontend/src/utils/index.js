@@ -569,6 +569,15 @@ const getSidebarItems = (forMobile = false) => {
 					activeFor: ['Statistics'],
 				},
 				{
+					label: 'Audit Log',
+					icon: 'ScrollText',
+					to: 'AuditLog',
+					activeFor: ['AuditLog'],
+					condition: () => {
+						return !forMobile && userResource?.data?.is_system_manager
+					},
+				},
+				{
 					label: 'Earnings',
 					icon: 'WalletCards',
 					to: 'Earnings',

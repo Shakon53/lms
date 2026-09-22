@@ -3,7 +3,7 @@ name = "lms"
 authors = [
     { name = "Frappe Technologies Pvt Ltd", email = "developers@frappe.io"}
 ]
-description = "Easy to use, open source, Learning Management System"
+description = "YU-LMS learning management system"
 requires-python = ">=3.10"
 readme = "README.md"
 dynamic = ["version"]
@@ -81,7 +81,6 @@ index_html_path = "../lms/www/_lms.html"
 
 
 [project.urls]
-Homepage = "https://frappe.io/learning"
-Repository = "https://github.com/frappe/lms.git"
-"Bug Reports" = "https://github.com/frappe/lms/issues"
-
+Homepage = "https://yu-lms.opik.net"
+Repository = "https://github.com/Shakon53/lms.git"
+"Bug Reports" = "https://github.com/Shakon53/lms/issues"

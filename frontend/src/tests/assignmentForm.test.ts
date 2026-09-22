@@ -177,7 +177,14 @@ const student = {
 
 // The form was converted from a modal by moving this field set wholesale, so
 // pin it: a field dropped in the move is otherwise invisible to the suite.
-const FIELD_LABELS = ['Title', 'Submission Type', 'Course', 'Question']
+const FIELD_LABELS = [
+	'Title',
+	'Submission Type',
+	'Course',
+	'Maximum Score',
+	'Question',
+	'Grading Rubric',
+]
 
 const RECORD = {
 	name: 'ASG-0001',
@@ -185,6 +192,8 @@ const RECORD = {
 	type: 'Text',
 	question: '<p>Why?</p>',
 	course: 'COURSE-1',
+	grading_rubric: '<p>Clarity and accuracy</p>',
+	maximum_score: 20,
 }
 
 const inputs = (wrapper: any) =>
@@ -295,7 +304,7 @@ describe('AssignmentForm as a route', () => {
 		const wrapper = await mountForm(router, moderator)
 
 		const values = inputs(wrapper).map((i: any) => i.element.value)
-		expect(values).toEqual(['Write an essay', 'Text', 'COURSE-1'])
+		expect(values).toEqual(['Write an essay', 'Text', 'COURSE-1', '20'])
 		expect(wrapper.html()).toContain('Edit Assignment')
 	})
 
@@ -310,6 +319,7 @@ describe('AssignmentForm as a route', () => {
 			'',
 			'',
 			'',
+			'100',
 		])
 
 		docResource.current.doc = RECORD
@@ -318,6 +328,7 @@ describe('AssignmentForm as a route', () => {
 			'Write an essay',
 			'Text',
 			'COURSE-1',
+			'20',
 		])
 	})
 
@@ -350,6 +361,8 @@ describe('AssignmentForm as a route', () => {
 				type: '',
 				question: '',
 				course: '',
+				grading_rubric: '',
+				maximum_score: 100,
 			},
 		})
 	})
@@ -370,6 +383,8 @@ describe('AssignmentForm as a route', () => {
 			type: 'Text',
 			question: '<p>Why?</p>',
 			course: 'COURSE-1',
+			grading_rubric: '<p>Clarity and accuracy</p>',
+			maximum_score: 20,
 		})
 		expect(insertSubmit).not.toHaveBeenCalled()
 	})

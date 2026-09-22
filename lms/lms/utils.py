@@ -25,6 +25,7 @@ from frappe.utils import (
 	get_system_timezone,
 	get_time,
 	getdate,
+	now_datetime,
 	nowtime,
 	rounded,
 	to_timedelta,
@@ -1683,7 +1684,7 @@ def get_assessments(batch: str) -> list:
 	assessments = frappe.get_all(
 		"LMS Assessment",
 		{"parent": batch},
-		["name", "assessment_type", "assessment_name"],
+		["name", "assessment_type", "assessment_name", "due_date"],
 		order_by="idx",
 	)
 
@@ -1696,6 +1697,10 @@ def get_assessments(batch: str) -> list:
 
 		elif assessment.assessment_type == "LMS Programming Exercise":
 			assessment = get_exercise_details(assessment, member)
+
+		if assessment.due_date and not assessment.completed and getdate(assessment.due_date) < getdate():
+			assessment.status = "Overdue"
+			assessment.color = "red"
 
 	return assessments
 
@@ -1794,6 +1799,93 @@ def get_batch_student_progress(member: str, batch: str) -> dict:
 	details = get_batch_student_details(member)
 	calculate_student_progress(batch, details)
 	return details
+
+
+@frappe.whitelist()
+def get_at_risk_learners(batch: str) -> list[dict]:
+	"""Learners needing attention because of overdue work, low progress, or inactivity."""
+	if not can_modify_batch(batch):
+		frappe.throw(_("You are not authorized to view the students of this batch."))
+
+	students = frappe.get_all(
+		"LMS Batch Enrollment",
+		filters={"batch": batch},
+		fields=["member", "member_name", "member_image", "creation", "modified"],
+	)
+	if not students:
+		return []
+
+	members = [row.member for row in students]
+	courses = frappe.get_all("Batch Course", {"parent": batch}, pluck="course")
+	progress_rows = (
+		frappe.get_all(
+			"LMS Enrollment",
+			filters={"member": ["in", members], "course": ["in", courses]},
+			fields=["member", "progress", "modified"],
+		)
+		if courses
+		else []
+	)
+
+	progress_by_member: dict[str, list[float]] = {member: [] for member in members}
+	activity_by_member = {row.member: get_datetime(row.modified or row.creation) for row in students}
+	for row in progress_rows:
+		progress_by_member[row.member].append(flt(row.progress))
+		activity_by_member[row.member] = max(activity_by_member[row.member], get_datetime(row.modified))
+
+	overdue = frappe.get_all(
+		"LMS Assessment",
+		filters={"parent": batch, "due_date": ["<", getdate()]},
+		fields=["assessment_type", "assessment_name"],
+	)
+	completion_fields = {
+		"LMS Assignment": ("LMS Assignment Submission", "assignment"),
+		"LMS Quiz": ("LMS Quiz Submission", "quiz"),
+		"LMS Programming Exercise": ("LMS Programming Exercise Submission", "exercise"),
+	}
+	completed: set[tuple[str, str, str]] = set()
+	for assessment_type, (submission_type, link_field) in completion_fields.items():
+		names = [row.assessment_name for row in overdue if row.assessment_type == assessment_type]
+		if not names:
+			continue
+		for row in frappe.get_all(
+			submission_type,
+			filters={"member": ["in", members], link_field: ["in", names]},
+			fields=["member", link_field, "modified"],
+		):
+			completed.add((assessment_type, row.get(link_field), row.member))
+			activity_by_member[row.member] = max(activity_by_member[row.member], get_datetime(row.modified))
+
+	now = now_datetime()
+	result = []
+	for student in students:
+		values = progress_by_member[student.member]
+		progress = round(sum(values) / len(values)) if values else 0
+		overdue_count = sum(
+			(assessment.assessment_type, assessment.assessment_name, student.member) not in completed
+			for assessment in overdue
+		)
+		inactive_days = max(0, (now - activity_by_member[student.member]).days)
+		reasons = []
+		if overdue_count:
+			reasons.append(_("{0} overdue").format(overdue_count))
+		if progress < 25 and (now - get_datetime(student.creation)).days >= 7:
+			reasons.append(_("Low progress"))
+		if inactive_days >= 7:
+			reasons.append(_("Inactive for {0} days").format(inactive_days))
+		if reasons:
+			result.append(
+				{
+					"member": student.member,
+					"member_name": student.member_name,
+					"member_image": student.member_image,
+					"progress": progress,
+					"overdue_count": overdue_count,
+					"inactive_days": inactive_days,
+					"reason": ", ".join(reasons),
+				}
+			)
+	return sorted(result, key=lambda row: (-row["overdue_count"], row["progress"], -row["inactive_days"]))
 
 
 def get_course_completion_stats(batch: str) -> list:
@@ -3018,7 +3110,7 @@ def get_field_meta(doctype, fieldnames):
 
 def is_demo_course(course: str) -> bool:
 	title = frappe.db.get_value("LMS Course", course, "title")
-	return title == "A guide to Frappe Learning"
+	return title in {"A guide to YU-LMS", "A guide to Frappe Learning"}
 
 
 def sanitize_editorjs(raw):

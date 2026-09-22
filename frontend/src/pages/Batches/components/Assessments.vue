@@ -29,6 +29,9 @@
 					>
 						{{ value }}
 					</Badge>
+					<span v-else-if="column.key == 'due_date'" class="text-ink-gray-6">
+						{{ value ? dayjs(value).format('DD MMM YYYY') : __('No deadline') }}
+					</span>
 					<span v-else>{{ value }}</span>
 				</template>
 				<template #selection-actions="{ unselectAll, selections }">
@@ -57,6 +60,7 @@ import { openBatchForm } from '@/composables/useBatchForms'
 import ResponsiveListView from '@/components/ResponsiveListView.vue'
 
 const user = inject('$user')
+const dayjs = inject('$dayjs')
 const readOnlyMode = window.read_only_mode
 
 const props = defineProps({
@@ -182,6 +186,11 @@ const assessmentColumns = computed(() => {
 			label: __('Type'),
 			key: 'assessment_type',
 			width: '10rem',
+		},
+		{
+			label: __('Due Date'),
+			key: 'due_date',
+			width: '11rem',
 		},
 	]
 

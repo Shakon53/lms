@@ -1,7 +1,7 @@
 <div align="center" markdown="1">
 
-<img src=".github/lms-logo.png" alt="Frappe Learning logo" width="80" height="80"/>
-<h1>Frappe Learning</h1>
+<img src="frontend/public/yu-lms-book-icon-v3.png" alt="YU-LMS logo" width="80" height="80"/>
+<h1>YU-LMS</h1>
 
 **Easy to use, open source, Learning Management System**
 
@@ -15,13 +15,16 @@
 </div>
 <br />
 <div align="center">
-	<a href="https://frappe.io/learning">Website</a>
+	<a href="https://yu-lms.opik.net">Website</a>
 	-
-	<a href="https://docs.frappe.io/learning">Documentation</a>
+	<a href="https://yu-lms.opik.net/lms/help">Help</a>
 </div>
 
-## Frappe Learning
-Frappe Learning is an easy-to-use learning system that helps you bring structure to your content.
+## YU-LMS
+YU-LMS is a learning management system for delivering courses, managing cohorts,
+assessing learners, issuing certificates, and tracking learning progress.
+
+YU-LMS is based on the open-source Frappe Learning project and keeps its AGPL-3.0-or-later license.
 
 ### Motivation
 In 2021, we were looking for a Learning Management System to launch ~~Mon.School~~[^1] for FOSS United. We checked out Moodle, but it didn’t feel right. The forms were unnecessarily lengthy and the UI was confusing. It shouldn't be this hard to create a course right? So I started making a learning system ~~for Mon.School which soon became a product in itself~~. The aim is to have a simple platform that anyone can use to launch a course of their own and make knowledge sharing easier.
@@ -94,7 +97,7 @@ It takes care of installation, setup, upgrades, monitoring, maintenance and supp
 
 ### Self Hosting
 
-Follow these steps to set up Frappe Learning in production:
+Follow these steps to set up YU-LMS in production:
 
 **Step 1**: Download the easy install script
 
@@ -118,7 +121,7 @@ Replace the following parameters with your values:
 - `your_email.example.com`: Your email address
 - `subdomain.domain.tld`: Your domain name where Learning will be hosted
 
-The script will set up a production-ready instance of Frappe Learning with all the necessary configurations in about 5 minutes.
+The script will set up a production-ready LMS instance with all the necessary configurations in about 5 minutes.
 
 **Note:** To avoid a `404 Page Not Found` error:
 - If hosting on a **public server**, make sure your DNS **A record** points to your server's IP.
@@ -163,7 +166,7 @@ To setup the repository locally follow the steps mentioned below:
 	$ bench new-site learning.test
  	$ bench --site learning.test add-to-hosts
  	$ bench get-app https://github.com/frappe/payments
- 	$ bench get-app https://github.com/frappe/lms
+	$ bench get-app https://github.com/Shakon53/lms
  	$ bench --site learning.test install-app lms
  	
 	```
@@ -171,9 +174,11 @@ To setup the repository locally follow the steps mentioned below:
 
 ## Learn and connect
 
+- [YU-LMS documentation](docs/README.md)
+
 - [Telegram Public Group](https://t.me/frappelms)
 - [Discuss Forum](https://discuss.frappe.io/c/lms/70)
-- [Documentation](https://docs.frappe.io/learning)
+- [Help center](https://yu-lms.opik.net/lms/help)
 - [YouTube](https://www.youtube.com/channel/UCn3bV5kx77HsVwtnlCeEi_A)
 
 <br>

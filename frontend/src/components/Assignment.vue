@@ -23,6 +23,21 @@
 				v-safe-html:rich="assignment.data.question"
 				class="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal"
 			></div>
+			<div
+				v-if="assignment.data.grading_rubric"
+				class="mt-6 rounded-lg border p-4"
+			>
+				<div class="mb-2 font-semibold text-ink-gray-9">
+					{{ __('Grading Rubric') }}
+				</div>
+				<div
+					v-safe-html:rich="assignment.data.grading_rubric"
+					class="prose prose-sm max-w-none"
+				></div>
+				<div class="mt-3 text-sm text-ink-gray-6">
+					{{ __('Maximum Score') }}: {{ assignment.data.maximum_score || 100 }}
+				</div>
+			</div>
 		</div>
 
 		<div class="flex flex-col overflow-y-auto">
@@ -171,6 +186,16 @@
 						v-safe-html:rich="submissionResource.doc.comments"
 					></div>
 				</div>
+				<div
+					v-if="
+						submissionResource.doc?.earned_score != null &&
+						!canGradeSubmission
+					"
+					class="rounded-lg border bg-surface-gray-2 p-3 text-ink-gray-9"
+				>
+					{{ __('Score') }}: {{ submissionResource.doc.earned_score }} /
+					{{ assignment.data.maximum_score || 100 }}
+				</div>
 
 				<!-- Grading -->
 				<div v-if="canGradeSubmission" class="mt-8 space-y-4">
@@ -183,6 +208,14 @@
 						:label="__('Grade')"
 						type="select"
 						:options="submissionStatusOptions"
+					/>
+					<FormControl
+						v-if="submissionResource.doc"
+						v-model="submissionResource.doc.earned_score"
+						type="number"
+						:label="__('Earned Score')"
+						:min="0"
+						:max="assignment.data.maximum_score || 100"
 					/>
 					<div>
 						<div class="text-p-sm-medium text-ink-gray-7 mb-1.5">

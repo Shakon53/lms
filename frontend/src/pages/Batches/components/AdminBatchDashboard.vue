@@ -37,7 +37,34 @@
 			</div>
 		</div>
 		<div
-			v-else
+			v-if="!showStudentsEmptyState && riskLearners.data?.length"
+			class="mb-8 rounded-lg border border-outline-gray-2 p-4"
+		>
+			<div class="mb-3 flex items-center justify-between gap-3">
+				<div>
+					<h2 class="text-lg-semibold text-ink-gray-9">{{ __('Learners needing attention') }}</h2>
+					<p class="text-p-sm text-ink-gray-6">{{ __('Based on overdue work, low progress, and recent activity.') }}</p>
+				</div>
+				<Badge theme="orange">{{ riskLearners.data.length }}</Badge>
+			</div>
+			<ResponsiveListView
+				:columns="riskColumns"
+				:rows="riskLearners.data"
+				row-key="member"
+				:options="{ selectable: false, showTooltip: false }"
+			>
+				<template #cell="{ column, row, value }">
+					<span v-if="column.key === 'member_name'" class="flex items-center gap-2">
+						<Avatar :image="row.member_image as string" :label="String(value)" size="sm" />
+						<span>{{ value }}</span>
+					</span>
+					<Badge v-else-if="column.key === 'progress'" :theme="Number(value) < 25 ? 'red' : 'orange'">{{ value }}%</Badge>
+					<span v-else>{{ value }}</span>
+				</template>
+			</ResponsiveListView>
+		</div>
+		<div
+			v-if="!showStudentsEmptyState"
 			class="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-5 items-start"
 		>
 			<div class="border rounded-lg py-3 px-4 order-2 lg:order-1">
@@ -160,6 +187,7 @@ import {
 	FormControl,
 	Avatar,
 	Button,
+	Badge,
 } from 'frappe-ui'
 import { computed, inject, onMounted, ref, watch } from 'vue'
 import type dayjsType from 'dayjs'
@@ -213,6 +241,19 @@ const studentCount = createResource({
 	},
 	auto: true,
 })
+
+const riskLearners = createResource({
+	url: 'lms.lms.utils.get_at_risk_learners',
+	cache: ['batch_at_risk', props.batch?.data?.name],
+	params: { batch: props.batch?.data?.name },
+	auto: true,
+})
+
+const riskColumns = computed<ListColumn[]>(() => [
+	{ label: __('Student'), key: 'member_name', width: '14rem' },
+	{ label: __('Progress'), key: 'progress', width: '7rem' },
+	{ label: __('Reason'), key: 'reason' },
+])
 
 const students = createListResource({
 	doctype: 'LMS Batch Enrollment',

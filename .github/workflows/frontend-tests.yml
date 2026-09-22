@@ -32,3 +32,7 @@ jobs:
       - name: Run vitest
         working-directory: frontend
         run: yarn test --run
+
+      - name: Build production assets
+        working-directory: frontend
+        run: yarn build

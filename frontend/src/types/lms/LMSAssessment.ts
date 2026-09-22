@@ -13,4 +13,6 @@ export interface LMSAssessment {
 	assessment_type: string
 	/**	Assessment Name : Dynamic Link - assessment_type	*/
 	assessment_name: string
+	/** Due Date : Date */
+	due_date?: string
 }

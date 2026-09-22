@@ -18,7 +18,10 @@ async function shouldCapturePersona() {
 	const courseCount = await call('frappe.client.get_count', {
 		doctype: 'LMS Course',
 		filters: {
-			title: ['not like', '%A guide to Frappe Learning%'],
+			title: [
+				'not in',
+				['A guide to YU-LMS', 'A guide to Frappe Learning'],
+			],
 		},
 	})
 	return !courseCount

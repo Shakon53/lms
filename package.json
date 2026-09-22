@@ -1,7 +1,7 @@
 {
-  "name": "frappe_lms",
+  "name": "yu-lms",
   "version": "1.0.0",
-  "description": "Easy to use, open-source, Learning Management System",
+  "description": "YU-LMS learning management system",
   "type": "module",
   "workspaces1": [
     "frappe-ui",
@@ -16,14 +16,14 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/frappe/lms.git"
+    "url": "git+https://github.com/Shakon53/lms.git"
   },
   "author": "Frappe",
   "license": "AGPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/frappe/lms/issues"
+    "url": "https://github.com/Shakon53/lms/issues"
   },
-  "homepage": "https://github.com/frappe/lms#readme",
+  "homepage": "https://yu-lms.opik.net",
   "engines": {
     "node": ">=22"
   },

@@ -162,16 +162,16 @@ const pages: Record<string, Page> = {
 	},
 	Help: {
 		title: 'Help center',
-		introduction: 'Start with the most common actions or contact the platform team when you need more help.',
+		introduction: 'Choose the guidance that matches your role, or contact the platform team when you need more help.',
 		actions: [
 			{ label: 'Browse courses', href: '/lms/courses', icon: 'lucide-search', primary: true },
 			{ label: 'Reset password', href: '/login#forgot', icon: 'lucide-key-round' },
 		],
 		sections: [
-			{ title: 'Join a course', body: 'Open the course catalog, choose a course, and use the enrollment action shown on its overview page.', icon: 'lucide-circle-plus' },
-			{ title: 'Continue learning', body: 'Your home page and enrolled courses show where you stopped and which lesson comes next.', icon: 'lucide-play-circle' },
-			{ title: 'Submit work', body: 'Open an assignment or quiz from the lesson, complete it, and review its submission status.', icon: 'lucide-send' },
-			{ title: 'Account access', body: 'Use the login page to sign in, create an account, or request a password reset email.', icon: 'lucide-shield-check' },
+			{ title: 'For students', body: 'Open Home to continue learning. Complete each lesson requirement, submit work from its lesson, and check the submission status before leaving.', icon: 'lucide-graduation-cap' },
+			{ title: 'For instructors', body: 'Create a draft course, add chapters and lessons, verify it in Student View, then configure enrollment and completion requirements before publishing.', icon: 'lucide-presentation' },
+			{ title: 'For administrators', body: 'Configure branding, email, roles, integrations, payments, backups, and monitoring before inviting learners to the production site.', icon: 'lucide-settings' },
+			{ title: 'Account access', body: 'Use the login page to sign in, create an account, or request a password reset email. Never share passwords or one-time links.', icon: 'lucide-shield-check' },
 		],
 	},
 	Contact: {

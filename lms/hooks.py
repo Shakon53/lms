@@ -5,7 +5,7 @@ from . import __version__ as app_version
 app_name = "frappe_lms"
 app_title = "YU-LMS"
 app_publisher = "Frappe"
-app_description = "Modern Learning Management System"
+app_description = "YU-LMS learning management system"
 app_icon_url = "/assets/lms/frontend/yu-lms-book-icon-v3.png"
 app_icon_title = "YU-LMS"
 app_icon_route = "/lms"
@@ -294,7 +294,7 @@ require_type_annotated_api_methods = True
 
 # === Raven membership provider ===
 # Hook contract + admin setup: ../raven-membership-provider.md
-# TODO: that page is an interim capture. Publish it at docs.frappe.io/learning
+# TODO: expand the in-app YU-LMS help center with administrator operations.
 # (specs/extensibility.md: "A hook isn't shipped until the docs exist") and delete it.
 # LMS contributes its rule types + evaluator to the standalone `raven_integration`
 # app via the `raven_membership_providers` hook. See lms/raven_provider.py.

@@ -21,6 +21,12 @@
 					placeholder=" "
 					:onCreate="createAssessment"
 				/>
+				<FormControl
+					v-model="dueDate"
+					type="date"
+					:label="__('Due Date')"
+					:description="__('Leave empty when the assessment has no deadline.')"
+				/>
 			</div>
 		</template>
 		<template #actions>
@@ -65,6 +71,7 @@ const readOnlyMode = window.read_only_mode
 
 const assessmentType = ref(null)
 const assessment = ref(null)
+const dueDate = ref('')
 
 const { close, saveAndReplace } = useFormRoute(
 	batchRouteLocation('BatchDetail', props.batchName, route.hash)
@@ -100,6 +107,7 @@ const assessmentResource = createResource({
 				parentfield: 'assessment',
 				assessment_type: assessmentType.value,
 				assessment_name: assessment.value,
+				due_date: dueDate.value || null,
 			},
 		}
 	},

@@ -97,6 +97,51 @@ PERMISSION_DOCTYPES = (
 
 MAX_PERMISSION_BATCH = 200
 
+AUDITED_LMS_DOCTYPES = (
+	"LMS Course",
+	"Course Lesson",
+	"LMS Enrollment",
+	"LMS Batch",
+	"LMS Batch Enrollment",
+	"LMS Assignment Submission",
+	"LMS Quiz Submission",
+	"LMS Certificate",
+	"LMS Payment",
+)
+
+
+@frappe.whitelist()
+def get_audit_log(start: int = 0, page_length: int = 50, doctype: str | None = None, user: str | None = None):
+	"""Return a bounded, administrator-only view of critical LMS changes."""
+	frappe.only_for("System Manager")
+	start = max(0, int(start or 0))
+	page_length = min(max(1, int(page_length or 50)), 100)
+	filters = {"ref_doctype": ["in", AUDITED_LMS_DOCTYPES]}
+	if doctype:
+		if doctype not in AUDITED_LMS_DOCTYPES:
+			frappe.throw(_("Unsupported audit document type"))
+		filters["ref_doctype"] = doctype
+	if user:
+		filters["owner"] = user
+
+	versions = frappe.get_all(
+		"Version",
+		filters=filters,
+		fields=["name", "ref_doctype", "docname", "owner", "creation", "data"],
+		order_by="creation desc",
+		start=start,
+		page_length=page_length,
+	)
+	for version in versions:
+		try:
+			data = json.loads(version.pop("data") or "{}")
+		except (TypeError, ValueError):
+			data = {}
+		version["changed_fields"] = [change[0] for change in data.get("changed", []) if change]
+		version["added_rows"] = len(data.get("added", []))
+		version["removed_rows"] = len(data.get("removed", []))
+	return versions
+
 
 @frappe.whitelist()
 def get_doc_permissions_many(doctype: str, names: str | list[str]):
@@ -2954,11 +2999,15 @@ def get_badges(member: str):
 @frappe.whitelist()
 def clear_demo_data():
 	frappe.only_for("Moderator")
-	quiz_title = "Do you know Frappe Learning?"
+	quiz_title = "Do you know YU-LMS?"
 	if frappe.db.exists("LMS Quiz", {"title": quiz_title}):
 		frappe.db.delete("LMS Quiz", {"title": quiz_title})
 
-	demo_course = frappe.get_all("LMS Course", {"title": "A guide to Frappe Learning"}, pluck="name")
+	demo_course = frappe.get_all(
+		"LMS Course",
+		{"title": ["in", ["A guide to YU-LMS", "A guide to Frappe Learning"]]},
+		pluck="name",
+	)
 
 	if len(demo_course):
 		delete_course(demo_course[0])

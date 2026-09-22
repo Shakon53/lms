@@ -5,7 +5,7 @@ import frappe
 from frappe import _
 from frappe.desk.doctype.notification_log.notification_log import make_notification_logs
 from frappe.model.document import Document
-from frappe.utils import validate_url
+from frappe.utils import flt, validate_url
 
 from lms.lms.utils import PRIVILEGED_ROLES, get_lms_route
 
@@ -17,6 +17,7 @@ class LMSAssignmentSubmission(Document):
 		self.validate_duplicates()
 		self.validate_url()
 		self.validate_status()
+		self.validate_score()
 
 	def enforce_grading_permission(self):
 		"""Only evaluators/instructors may set the grading fields.
@@ -31,7 +32,7 @@ class LMSAssignmentSubmission(Document):
 		# Revert grading fields to their stored values on update, or to safe defaults on
 		# create / when no baseline is available (fail closed, never fail open).
 		previous = None if self.is_new() else self.get_doc_before_save()
-		defaults = {"status": "Not Graded", "comments": None, "evaluator": None}
+		defaults = {"status": "Not Graded", "comments": None, "evaluator": None, "earned_score": None}
 		for field, default in defaults.items():
 			setattr(self, field, previous.get(field) if previous else default)
 
@@ -72,6 +73,13 @@ class LMSAssignmentSubmission(Document):
 			return
 		if doc_before_save.status != self.status or doc_before_save.comments != self.comments:
 			self.trigger_update_notification()
+
+	def validate_score(self):
+		if self.earned_score in (None, ""):
+			return
+		maximum = flt(frappe.db.get_value("LMS Assignment", self.assignment, "maximum_score"))
+		if flt(self.earned_score) < 0 or (maximum and flt(self.earned_score) > maximum):
+			frappe.throw(_("Score must be between 0 and {0}.").format(maximum))
 
 	def validate_private_attachments(self):
 		if self.type == "Text":

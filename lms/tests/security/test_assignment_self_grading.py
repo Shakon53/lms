@@ -48,6 +48,17 @@ class TestAssignmentSelfGrading(BaseTestUtils, FrappeAPITestCase):
 			frappe.session.user = "Administrator"
 		self.assertEqual(frappe.db.get_value("LMS Assignment Submission", name, "status"), "Not Graded")
 
+	def test_student_cannot_set_own_score(self):
+		name = self._make_submission(self.student.email)
+		frappe.session.user = self.student.email
+		try:
+			doc = frappe.get_doc("LMS Assignment Submission", name)
+			doc.earned_score = 100
+			doc.save()
+		finally:
+			frappe.session.user = "Administrator"
+		self.assertIsNone(frappe.db.get_value("LMS Assignment Submission", name, "earned_score"))
+
 	def test_evaluator_can_grade_submission(self):
 		name = self._make_submission(self.student.email)
 		frappe.session.user = self.evaluator.email
@@ -58,3 +69,15 @@ class TestAssignmentSelfGrading(BaseTestUtils, FrappeAPITestCase):
 		finally:
 			frappe.session.user = "Administrator"
 		self.assertEqual(frappe.db.get_value("LMS Assignment Submission", name, "status"), "Pass")
+
+	def test_evaluator_score_cannot_exceed_maximum(self):
+		name = self._make_submission(self.student.email)
+		frappe.db.set_value("LMS Assignment", self.assignment.name, "maximum_score", 10)
+		frappe.session.user = self.evaluator.email
+		try:
+			doc = frappe.get_doc("LMS Assignment Submission", name)
+			doc.earned_score = 11
+			with self.assertRaises(frappe.ValidationError):
+				doc.save()
+		finally:
+			frappe.session.user = "Administrator"

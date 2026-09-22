@@ -23,6 +23,12 @@
 					doctype="LMS Course"
 					placeholder=" "
 				/>
+				<FormControl
+					v-model="assignment.maximum_score"
+					type="number"
+					:label="__('Maximum Score')"
+					:min="0"
+				/>
 				<div
 					role="group"
 					:aria-labelledby="questionLabelId"
@@ -40,6 +46,17 @@
 						:editable="true"
 						:fixedMenu="true"
 						editorClass="prose-sm max-w-none border-b border-x border-outline-elevation-2 bg-surface-gray-2 rounded-b-md py-1 px-2 min-h-[10rem] max-h-[18rem] overflow-y-auto"
+					/>
+				</div>
+				<div role="group" :aria-labelledby="rubricLabelId" class="space-y-1.5">
+					<InputLabel :id="rubricLabelId" :label="__('Grading Rubric')" />
+					<RichTextEditor
+						:content="assignment.grading_rubric"
+						@change="(val: string) => (assignment.grading_rubric = val)"
+						:editable="true"
+						:fixedMenu="true"
+						:uploadArgs="{ private: true }"
+						editorClass="prose-sm max-w-none border-b border-x border-outline-elevation-2 bg-surface-gray-2 rounded-b-md py-1 px-2 min-h-[7rem]"
 					/>
 				</div>
 			</div>
@@ -90,6 +107,7 @@ import { InputLabel } from '@/components/Form/labeling'
 import { submitResource } from '@/utils/resource'
 
 const questionLabelId = useId()
+const rubricLabelId = useId()
 
 const props = withDefaults(defineProps<{ assignmentID?: string }>(), {
 	assignmentID: 'new',
@@ -127,6 +145,8 @@ interface AssignmentFields {
 	type: string
 	question: string
 	course: string
+	grading_rubric: string
+	maximum_score: number
 }
 
 const assignment = reactive<AssignmentFields>({
@@ -134,6 +154,8 @@ const assignment = reactive<AssignmentFields>({
 	type: '',
 	question: '',
 	course: '',
+	grading_rubric: '',
+	maximum_score: 100,
 })
 
 // C4: edit mode used to copy its values out of the parent list's in-memory
@@ -169,6 +191,8 @@ watch(
 		assignment.type = doc.type
 		assignment.question = doc.question
 		assignment.course = doc.course || ''
+		assignment.grading_rubric = doc.grading_rubric || ''
+		assignment.maximum_score = Number(doc.maximum_score ?? 100)
 	},
 	{ immediate: true }
 )

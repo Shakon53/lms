@@ -20,6 +20,7 @@
   "section_break_ydgh",
   "column_break_oqqy",
   "status",
+  "earned_score",
   "question",
   "column_break_tbnv",
   "comments",
@@ -91,6 +92,12 @@
    "fieldtype": "Link",
    "label": "Evaluator",
    "options": "User"
+  },
+  {
+   "fieldname": "earned_score",
+   "fieldtype": "Float",
+   "label": "Earned Score",
+   "non_negative": 1
   },
   {
    "depends_on": "eval:!([\"URL\", \"Text\"]).includes(doc.type);",
@@ -225,6 +232,7 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "track_changes": 1,
  "states": [
   {
    "color": "Green",

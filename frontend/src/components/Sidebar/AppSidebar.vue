@@ -238,7 +238,7 @@
 			:afterSkipAll="() => capture('onboarding_steps_skipped')"
 			:afterReset="(step) => capture('onboarding_step_reset_' + step)"
 			:afterResetAll="() => capture('onboarding_steps_reset')"
-			docsLink="https://docs.frappe.io/learning"
+			docsLink="/lms/help"
 		/>
 		<IntermediateStepModal
 			v-model="showIntermediateModal"
@@ -670,7 +670,7 @@ const updateSidebarLinks = () => {
 }
 
 const redirectToWebsite = () => {
-	openExternal('https://frappe.io/learning')
+	openExternal('https://yu-lms.opik.net')
 }
 
 const isStudent = computed(() => {

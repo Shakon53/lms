@@ -154,6 +154,11 @@ export const routes = [
 		component: () => import('@/pages/Statistics.vue'),
 	},
 	{
+		path: '/audit-log',
+		name: 'AuditLog',
+		component: () => import('@/pages/AuditLog.vue'),
+	},
+	{
 		path: '/earnings',
 		name: 'Earnings',
 		component: () => import('@/pages/Earnings.vue'),
