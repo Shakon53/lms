@@ -1,562 +1,240 @@
+"""Realistic starter courses installed by the setup wizard.
+
+Generated courses carry a private marker tag so cleanup never touches content
+created by a user.
+"""
+
 import json
 
 import frappe
 
-from lms.lms.doctype.lms_course.lms_course import update_course_statistics
 from lms.lms.utils import create_user, get_course_progress
 
 
-def create_demo_data(args: dict = None):
-	course = create_course()
-	student = create_user(
-		email="ash@ipp.com",
-		first_name="Ashley",
-		last_name="Ippolito",
-		full_name="Ashley Ippolito",
-		user_image="/assets/lms/images/student.jpg",
-	)
-	student1 = create_user(
-		email="john.doe@example.com",
-		first_name="John",
-		last_name="Doe",
-		full_name="John Doe",
-		user_image="/assets/lms/images/student1.jpeg",
-	)
-	student2 = create_user(
-		email="jane.smith@example.com",
-		first_name="Jane",
-		last_name="Smith",
-		full_name="Jane Smith",
-		user_image="/assets/lms/images/student2.jpeg",
-	)
-	create_chapter(course)
-	create_lessons(course)
-	enroll_student_in_course(student, course)
-	enroll_student_in_course(student1, course)
-	enroll_student_in_course(student2, course)
-	create_reviews(course, student)
-	create_progress(course, student, 3)
-	create_progress(course, student1, 2)
-	create_progress(course, student2, 4)
+DEMO_TAG = "YU-DEMO-2026"
+LEGACY_TITLES = ("A guide to YU-LMS", "A guide to Frappe Learning")
+DEMO_USERS = ("student.demo@yessenov.edu.kz", "student.two.demo@yessenov.edu.kz")
+
+
+COURSES = [
+	{
+		"title": "Цифровая грамотность: уверенная работа с информацией",
+		"tags": f"Цифровые навыки, Информационная грамотность, {DEMO_TAG}",
+		"color": "Blue",
+		"intro": "Научитесь искать, проверять и безопасно использовать информацию в учебе и работе.",
+		"description": """<p>Практический курс для студентов любого направления. Вы освоите эффективный поиск, проверку источников, совместную работу с файлами и базовые правила цифровой безопасности.</p><h3>Результаты обучения</h3><ul><li>формулировать точные поисковые запросы;</li><li>оценивать надежность источников;</li><li>защищать аккаунты и персональные данные;</li><li>готовить аккуратные цифровые материалы.</li></ul><p><strong>Формат:</strong> 6 уроков, 2 задания и итоговый тест.</p>""",
+		"chapters": [
+			("Поиск и оценка информации", [
+				("Как устроен цифровой след", "Разберем, какие данные остаются после действий в интернете и как управлять цифровой репутацией.", ["Отделяйте публичные данные от приватных.", "Проверяйте разрешения приложений раз в месяц.", "Не публикуйте документы с персональными данными."]),
+				("Поиск без информационного шума", "Освоим операторы поиска, фильтры и приемы уточнения запроса.", ["Используйте кавычки для точной фразы.", "Ограничивайте поиск доменом через site:.", "Сравнивайте дату и контекст публикации."]),
+				("Практика: проверка спорной публикации", "assignment", "source_check"),
+			]),
+			("Безопасность и совместная работа", [
+				("Пароли, MFA и фишинг", "Научимся распознавать поддельные письма и защищать аккаунты многофакторной аутентификацией.", ["Используйте уникальные парольные фразы.", "Включайте MFA в важных сервисах.", "Проверяйте домен до перехода по ссылке."]),
+				("Файлы и командная работа", "Разберем структуру папок, версии и уровни доступа.", ["Добавляйте дату и версию в имя файла.", "Выдавайте минимально необходимый доступ.", "Храните финальные материалы отдельно от черновиков."]),
+				("Практика: цифровой аудит", "assignment", "digital_audit"),
+			]),
+			("Итоговая аттестация", [("Итоговый тест", "quiz", None)]),
+		],
+		"assignments": {
+			"source_check": ("Проверка надежности источника", "PDF", "Выберите спорную публикацию. Найдите первоисточник, проверьте автора, дату и доказательства, затем подтвердите вывод минимум двумя независимыми источниками. Загрузите отчет на 1–2 страницы.", ["Первоисточник и контекст — 25", "Проверка автора и доказательств — 30", "Независимое подтверждение — 25", "Аргументированный вывод и оформление — 20"]),
+			"digital_audit": ("Аудит личной цифровой безопасности", "Text", "Проведите безопасный аудит трех своих аккаунтов: MFA, уникальность паролей, активные сессии и доступ приложений. Не указывайте пароли. Опишите пять улучшений и план на следующий месяц.", ["Полнота аудита — 40", "Конкретные улучшения — 35", "Реалистичный план — 25"]),
+		},
+		"quiz": [
+			("Какой признак сильнее всего повышает надежность материала?", ["Много лайков", "Проверяемый первоисточник", "Яркий заголовок", "Публикация в чате"], 1),
+			("Что делать с подозрительным письмом?", ["Открыть вложение", "Ответить", "Проверить домен и связаться по известному каналу", "Переслать коллегам"], 2),
+			("Для чего нужна MFA?", ["Ускорить интернет", "Добавить независимое подтверждение входа", "Хранить файлы", "Удалить рекламу"], 1),
+			("Какой доступ безопаснее выдать по умолчанию?", ["Публичное редактирование", "Минимально необходимый", "Всем в интернете", "Бессрочный"], 1),
+		],
+	},
+	{
+		"title": "Академическое письмо и работа с источниками",
+		"tags": f"Академическое письмо, Исследование, {DEMO_TAG}",
+		"color": "Violet",
+		"intro": "От исследовательского вопроса до ясного текста с корректными ссылками и аргументацией.",
+		"description": """<p>Курс помогает подготовить структурированную академическую работу без плагиата. В центре — тезис, доказательства, логика абзаца и ответственное использование источников.</p><h3>Вы научитесь</h3><ul><li>сужать тему до исследовательского вопроса;</li><li>строить аргумент и связный абзац;</li><li>перефразировать без искажения смысла;</li><li>оформлять цитаты и список литературы.</li></ul><p><strong>Итог:</strong> готовый фрагмент академической работы и тест.</p>""",
+		"chapters": [
+			("Аргумент и структура", [
+				("От темы к исследовательскому вопросу", "Хороший вопрос конкретен, исследуем и допускает аргументированный ответ.", ["Ограничьте объект, период и контекст.", "Избегайте вопросов с ответом «да» или «нет».", "Проверьте доступность источников."]),
+				("Тезис и логика абзаца", "Освоим модель: тезис — доказательство — объяснение — вывод.", ["Один абзац раскрывает одну мысль.", "Каждое доказательство связывайте с тезисом.", "Переходы показывают логику рассуждения."]),
+				("Практика: карта аргумента", "assignment", "argument_map"),
+			]),
+			("Источники и академическая этика", [
+				("Цитирование, пересказ и плагиат", "Разберем, когда цитировать дословно, когда пересказывать и почему ссылка нужна в обоих случаях.", ["Сохраняйте смысл автора.", "Отмечайте прямые цитаты кавычками.", "Фиксируйте источник сразу."]),
+				("Редактирование ясного текста", "Проверим текст на точность, связность и единообразие терминов.", ["Сначала редактируйте структуру.", "Заменяйте расплывчатые слова конкретными.", "Читайте текст вслух."]),
+				("Практика: аналитический абзац", "assignment", "academic_paragraph"),
+			]),
+			("Итоговая аттестация", [("Итоговый тест", "quiz", None)]),
+		],
+		"assignments": {
+			"argument_map": ("Карта академического аргумента", "PDF", "Сформулируйте исследовательский вопрос и тезис. Подготовьте карту из двух аргументов, возможного контраргумента и ответа на него. Для каждого аргумента укажите тип доказательств.", ["Вопрос и тезис — 30", "Логика аргументов — 35", "Контраргумент — 20", "Выбор доказательств — 15"]),
+			"academic_paragraph": ("Аналитический абзац с источниками", "Document", "Напишите 180–250 слов: тезисное предложение, данные из двух надежных источников, объяснение связи доказательств с тезисом и итоговое предложение. Добавьте ссылки в одном стиле.", ["Ясный тезис — 20", "Интеграция источников — 30", "Анализ — 30", "Связность и оформление — 20"]),
+		},
+		"quiz": [
+			("Какой исследовательский вопрос лучше?", ["Что такое образование?", "Как смешанное обучение повлияло на вовлеченность первокурсников YU в 2025 году?", "Полезен ли интернет?", "Почему всё меняется?"], 1),
+			("Что следует за доказательством в аналитическом абзаце?", ["Несвязанная мысль", "Объяснение связи с тезисом", "Длинная цитата", "Список терминов"], 1),
+			("Нужна ли ссылка при пересказе идеи?", ["Нет", "Только в заключении", "Да, источник идеи нужно указать", "Только для длинного текста"], 2),
+			("С чего начинать редактирование?", ["С запятых", "Со структуры и логики", "Со шрифта", "С нумерации"], 1),
+		],
+	},
+	{
+		"title": "Управление проектами: от идеи до результата",
+		"tags": f"Проекты, Командная работа, {DEMO_TAG}",
+		"color": "Teal",
+		"intro": "Спланируйте учебный или рабочий проект: цель, роли, сроки, риски и измеримый результат.",
+		"description": """<p>Прикладной курс по запуску небольших проектов. Вы создадите паспорт проекта, рабочий план и реестр рисков.</p><h3>После курса вы сможете</h3><ul><li>ставить измеримую цель и определять границы;</li><li>декомпозировать результат на задачи;</li><li>распределять ответственность;</li><li>управлять сроками, рисками и изменениями.</li></ul><p><strong>Формат:</strong> теория, шаблоны, две работы и итоговый тест.</p>""",
+		"chapters": [
+			("Запуск проекта", [
+				("Цель, результат и границы", "Различим проблему, цель, продукт проекта и критерии готовности.", ["Формулируйте цель через результат.", "Зафиксируйте, что не входит в проект.", "Согласуйте критерии приемки до старта."]),
+				("Заинтересованные стороны и роли", "Определим заказчика, пользователей, команду и зоны ответственности.", ["У каждой задачи один ответственный.", "Вовлекайте пользователей заранее.", "Фиксируйте решения."]),
+				("Практика: паспорт проекта", "assignment", "project_charter"),
+			]),
+			("Планирование и контроль", [
+				("Декомпозиция, сроки и зависимости", "Разобьем результат на проверяемые задачи и построим реалистичную последовательность.", ["У задачи должен быть результат.", "Отмечайте зависимости до сроков.", "Оставляйте резерв."]),
+				("Риски и ретроспектива", "Создадим реестр рисков и ритм коротких статусных встреч.", ["Оценивайте вероятность и влияние.", "Назначайте владельца реакции.", "Завершайте этап разбором уроков."]),
+				("Практика: план и реестр рисков", "assignment", "risk_plan"),
+			]),
+			("Итоговая аттестация", [("Итоговый тест", "quiz", None)]),
+		],
+		"assignments": {
+			"project_charter": ("Паспорт проекта", "PDF", "Подготовьте одностраничный паспорт проекта: проблема, SMART-цель, измеримый результат, границы, заинтересованные стороны, роли и три критерия приемки.", ["Проблема и цель — 30", "Результат и границы — 25", "Роли — 25", "Критерии приемки — 20"]),
+			"risk_plan": ("План работ и реестр рисков", "Document", "Разбейте проект минимум на 8 задач, укажите ответственных, сроки и зависимости. Добавьте 5 рисков с вероятностью, влиянием, профилактикой и планом реакции.", ["Декомпозиция — 30", "Сроки и зависимости — 25", "Анализ рисков — 30", "Ясность документа — 15"]),
+		},
+		"quiz": [
+			("Что описывает критерий приемки?", ["Настроение команды", "Проверяемое условие готовности", "Бюджет вуза", "Название проекта"], 1),
+			("Зачем фиксировать границы проекта?", ["Исключить команду", "Управлять ожиданиями и изменениями", "Не оценивать сроки", "Убрать качество"], 1),
+			("Что сделать до назначения сроков?", ["Выбрать цвет", "Определить зависимости", "Закрыть проект", "Удалить риски"], 1),
+			("Хорошая запись о риске включает…", ["Только название", "Вероятность, влияние, владельца и реакцию", "Только стоимость", "Список участников"], 1),
+		],
+	},
+]
+
+
+def create_demo_data(args: dict | None = None):
+	remove_legacy_demo_content()
+	instructor = get_or_create_instructor()
+	students = get_or_create_students()
+	for index, spec in enumerate(COURSES):
+		course = create_course(spec, instructor)
+		create_course_content(course, spec)
+		for student in students:
+			enroll(student, course)
+		create_progress(course, students[0], 2 + index)
 	frappe.db.set_single_value("LMS Settings", "demo_data_present", 1)
 
 
-def create_course():
-	title = "A guide to YU-LMS"
-	filters = {"title": title}
-	if frappe.db.exists("LMS Course", filters):
-		return frappe.get_doc("LMS Course", filters)
+def remove_legacy_demo_content():
+	from lms.lms.api import delete_course
 
-	instructor = create_instructor()
-	course = frappe.new_doc("LMS Course")
-	course.update(
-		{
-			"title": title,
-			"category": "Business",
-			"tags": "Frappe, Demo",
-			"published": 1,
-			"published_on": frappe.utils.now(),
-			"video_link": "VIt_bsbBjLI",
-			"instructors": [{"instructor": instructor.name}],
-			"short_introduction": "Learn the basics of YU-LMS and how to get started with your first course.",
-			"image": "/assets/lms/images/course_card.jpeg",
-		}
-	)
-
-	course.description = """
-		This course covers the fundamentals of YU-LMS, including how to create and manage courses, enroll students, and track progress. You will learn about the following key features:
-		<br>
-		<h3>Key Features</h3>
-		<br>
-		1. Structured Learning: Design a course with a 3-level hierarchy, where your courses have chapters, and you can group your lessons within these chapters. This ensures that the context of each lesson is clearly defined by its chapter.
-		<br>
-		<br>
-		2. Live Classes: Group learners into batches based on courses and duration. You can then create Zoom live classes for these batches directly from the app. Learners can view all the live classes they need to attend as part of their batch.
-		<br>
-		<br>
-		3. Quizzes and Assignments: Create quizzes with single-choice, multiple-choice, or open-ended questions. Instructors can also add assignments that learners can submit as PDFs or documents.
-		<br>
-		<br>
-		4. Getting Certified: Once a learner completes the course or batch, you can grant them a certificate. The app provides an inbuilt certificate template that you can use as-is or customize by creating your own template.
-		<br>
-		<br>
-		To learn more about the app and its features, open the <a href="/lms/help">YU-LMS help center</a>.
- """
-	course.save()
-	return course
-
-
-def create_instructor():
-	if (
-		frappe.db.count(
-			"User",
-			{
-				"name": ["not in", ("Administrator", "Guest")],
-			},
+	legacy = frappe.get_all("LMS Course", {"title": ["in", LEGACY_TITLES]}, pluck="name")
+	generated = frappe.get_all("LMS Course", {"tags": ["like", f"%{DEMO_TAG}%"]}, pluck="name")
+	for name in dict.fromkeys([*legacy, *generated]):
+		assignments = frappe.get_all("LMS Assignment", {"course": name}, pluck="name")
+		quizzes = frappe.get_all("LMS Quiz", {"course": name}, pluck="name")
+		questions = (
+			frappe.get_all("LMS Quiz Question", {"parent": ["in", quizzes]}, pluck="question")
+			if quizzes
+			else []
 		)
-		> 0
-	):
-		user = frappe.get_all(
-			"User",
-			{
-				"name": ["not in", ("Administrator", "Guest")],
-			},
-			pluck="name",
-			limit=1,
-		)[0]
-		instructor = frappe.get_doc("User", user)
-		instructor.user_image = "/assets/lms/images/instructor.png"
-		instructor.add_roles("Moderator")
-		instructor.save()
-		return instructor
-
-	return create_user(
-		email="jannat@example.com",
-		first_name="Jannat",
-		last_name="Patel",
-		user_image="/assets/lms/images/instructor.png",
-		roles=["Moderator"],
-	)
+		delete_course(name)
+		for assignment in assignments:
+			frappe.delete_doc("LMS Assignment", assignment, ignore_permissions=True)
+		for quiz in quizzes:
+			frappe.delete_doc("LMS Quiz", quiz, ignore_permissions=True)
+		for question in questions:
+			if frappe.db.exists("LMS Question", question):
+				frappe.delete_doc("LMS Question", question, ignore_permissions=True)
+	frappe.db.delete("LMS Quiz", {"title": "Do you know YU-LMS?"})
+	for email in ("ash@ipp.com", "john.doe@example.com", "jane.smith@example.com", "jannat@example.com"):
+		has_courses = frappe.db.exists("Course Instructor", {"instructor": email})
+		has_enrollments = frappe.db.exists("LMS Enrollment", {"member": email})
+		if frappe.db.exists("User", email) and not has_courses and not has_enrollments:
+			frappe.delete_doc("User", email, ignore_permissions=True)
 
 
-def create_chapter(course):
-	prepare_chapter(course, "Introduction")
-	prepare_chapter(course, "Adding content to your lessons")
-	prepare_chapter(course, "Assessments")
+def get_or_create_instructor():
+	users = frappe.get_all("User", {"name": ["not in", ("Administrator", "Guest", *DEMO_USERS)]}, pluck="name", limit=1)
+	if users:
+		user = frappe.get_doc("User", users[0])
+		user.add_roles("Moderator")
+		return user
+	return create_user(email="instructor.demo@yessenov.edu.kz", first_name="Преподаватель", last_name="YU", full_name="Преподаватель Yessenov University", roles=["Moderator"])
 
 
-def prepare_chapter(course, chapter_title):
-	chapter_exists = check_if_chapter_exists(course, chapter_title)
-	if chapter_exists:
-		return frappe.get_doc("Course Chapter", chapter_exists)
-
-	chapter1 = frappe.new_doc("Course Chapter")
-	chapter1.course = course.name
-	chapter1.title = chapter_title
-	chapter1.save()
-	add_chapter_to_course(course, chapter1)
+def get_or_create_students():
+	return [
+		create_user(email=DEMO_USERS[0], first_name="Айдана", last_name="Серик", full_name="Айдана Серик"),
+		create_user(email=DEMO_USERS[1], first_name="Данияр", last_name="Омаров", full_name="Данияр Омаров"),
+	]
 
 
-def check_if_chapter_exists(course, chapter_title):
-	filters = {"course": course.name, "title": chapter_title}
-	return frappe.db.exists("Course Chapter", filters)
-
-
-def add_chapter_to_course(course, chapter):
-	course.reload()
-	course.append("chapters", {"chapter": chapter.name})
-	course.save()
-
-
-def create_lessons(course):
-	create_intro_lesson_1(course)
-	create_intro_lesson_2(course)
-	create_content_lesson_1(course)
-	create_content_lesson_2(course)
-	create_assessment_lesson_1(course)
-
-
-def get_chapter(course, chapter_title):
-	filters = {"course": course.name, "title": chapter_title}
-	return frappe.get_doc("Course Chapter", filters)
-
-
-def create_lesson(course, chapter, title, content):
-	filters = {"course": course.name, "chapter": chapter.name, "title": title}
-
-	if frappe.db.exists("Course Lesson", filters):
-		return frappe.get_doc("Course Lesson", filters)
-
-	lesson = frappe.new_doc("Course Lesson")
-	lesson.course = course.name
-	lesson.chapter = chapter.name
-	lesson.title = title
-	lesson.content = content
-	lesson.save()
-	add_lesson_to_chapter(chapter, lesson)
-
-
-def add_lesson_to_chapter(chapter, lesson):
-	chapter.reload()
-	chapter.append("lessons", {"lesson": lesson.name})
-	chapter.save()
-
-
-def create_intro_lesson_1(course):
-	title = "What are Learning Management Systems?"
-	chapter = get_chapter(course, "Introduction")
-	content = """
-		{"time":1772449622100,"blocks":[{"id":"vYTdcXYVgI","type":"embed","data":{"service":"youtube","source":"https://www.youtube.com/watch?v=QhA4h6qD4wY","embed":"QhA4h6qD4wY","caption":""}}],"version":"2.29.0"}
-	"""
-	create_lesson(course, chapter, title, content)
-
-
-def create_intro_lesson_2(course):
-	title = "What is YU-LMS?"
-	chapter = get_chapter(course, "Introduction")
-	content = """
-		{"time":1772449622100,"blocks":[{"id":"vYTdcXYVgI","type":"embed","data":{"service":"youtube","source":"https://www.youtube.com/watch?v=gFXVCWmVQvQ","embed":"gFXVCWmVQvQ","caption":""}}],"version":"2.29.0"}
-	"""
-	create_lesson(course, chapter, title, content)
-
-
-def create_content_lesson_1(course):
-	title = "Video Content"
-	chapter = get_chapter(course, "Adding content to your lessons")
-	content = json.dumps(get_video_content())
-	create_lesson(course, chapter, title, content)
-
-
-def create_content_lesson_2(course):
-	title = "Content from Google Suite"
-	chapter = get_chapter(course, "Adding content to your lessons")
-	content = json.dumps(get_google_suite_content())
-	create_lesson(course, chapter, title, content)
-
-
-def create_assessment_lesson_1(course):
-	quiz = create_quiz()
-	title = "Quiz Time"
-	chapter = get_chapter(course, "Assessments")
-	content = f"""{{
-		"time": 1770118649591,
-		"blocks": [
-			{{
-				"id": "3xqARGZqQa",
-				"type": "quiz",
-				"data": {{ "quiz": "{quiz.name}" }}
-			}}
-		],
-		"version": "2.29.0"
-	}}"""
-	create_lesson(course, chapter, title, content)
-
-
-def create_quiz():
-	title = "Do you know YU-LMS?"
-	filters = {"title": title}
-	if frappe.db.exists("LMS Quiz", filters):
-		return frappe.get_doc("LMS Quiz", filters)
-
-	questions = []
-	questions.append(
-		create_quiz_questions(
-			"What is YU-LMS primarily used for?",
-			"Project Management",
-			False,
-			"Learning Management",
-			True,
-		)
-	)
-	questions.append(
-		create_quiz_questions(
-			"Which of the following can be added to a course in YU-LMS?",
-			"Lessons",
-			True,
-			"Issues",
-			False,
-		)
-	)
-	questions.append(
-		create_quiz_questions(
-			"What is the top-level structure in YU-LMS?", "Chapter", False, "Course", True
-		)
-	)
-	questions.append(
-		create_quiz_questions("Can you create quizzes in YU-LMS?", "Yes", True, "No", False)
-	)
-	questions.append(
-		create_quiz_questions(
-			"Which of the following content can be added to lessons?", "Bugs", False, "Videos", True
-		)
-	)
-	questions.append(
-		create_quiz_questions("Can you track learner progress in YU-LMS?", "Yes", True, "No", False)
-	)
-	questions.append(
-		create_quiz_questions(
-			"What is the purpose of a batch in YU-LMS?",
-			"To group learners",
-			True,
-			"To store website themes",
-			False,
-		)
-	)
-	questions.append(
-		create_quiz_questions(
-			"How can you create custom certificates in YU-LMS?",
-			"Using Server Scripts",
-			False,
-			"Using Print Formats",
-			True,
-		)
-	)
-	quiz = frappe.new_doc("LMS Quiz")
-	quiz.update(
-		{
-			"title": title,
-			"passing_percentage": 70,
-			"total_marks": 40,
-		}
-	)
-	for question in questions:
-		quiz.append(
-			"questions",
-			{
-				"question": question.name,
-				"marks": 5,
-			},
-		)
-	quiz.save()
-	return quiz
-
-
-def create_quiz_questions(question, option_1, is_correct_1, option_2, is_correct_2):
-	doc = frappe.new_doc("LMS Question")
-	doc.update(
-		{
-			"question": question,
-			"type": "Choices",
-			"option_1": option_1,
-			"is_correct_1": is_correct_1,
-			"option_2": option_2,
-			"is_correct_2": is_correct_2,
-		}
-	)
+def create_course(spec, instructor):
+	doc = frappe.new_doc("LMS Course")
+	doc.update({"title": spec["title"], "category": "Business", "tags": spec["tags"], "card_gradient": spec["color"], "published": 1, "featured": 1, "enable_certification": 1, "short_introduction": spec["intro"], "description": spec["description"], "instructors": [{"instructor": instructor.name}]})
 	doc.save()
 	return doc
 
 
-def create_reviews(course, student):
-	frappe.session.user = student.name
-	review = frappe.new_doc("LMS Course Review")
-	review.course = course.name
-	review.rating = 0.8
-	review.review = "This is a great course to get started with YU-LMS. The content is well-structured and easy to follow."
-	review.save()
-	frappe.session.user = "Administrator"
-	update_course_statistics()
+def create_course_content(course, spec):
+	assignments = {key: create_assignment(course, value) for key, value in spec["assignments"].items()}
+	quiz = create_quiz(course, spec["quiz"])
+	for chapter_title, lessons in spec["chapters"]:
+		chapter = frappe.get_doc({"doctype": "Course Chapter", "course": course.name, "title": chapter_title}).insert()
+		course.append("chapters", {"chapter": chapter.name})
+		for lesson_spec in lessons:
+			if lesson_spec[1] == "quiz":
+				content = assessment_content("quiz", "quiz", quiz.name)
+			elif lesson_spec[1] == "assignment":
+				content = assessment_content("assignment", "assignment", assignments[lesson_spec[2]].name)
+			else:
+				content = lesson_content(lesson_spec[1], lesson_spec[2])
+			lesson = frappe.get_doc({"doctype": "Course Lesson", "course": course.name, "chapter": chapter.name, "title": lesson_spec[0], "content": content}).insert()
+			chapter.append("lessons", {"lesson": lesson.name})
+		chapter.save()
+	course.save()
 
 
-def enroll_student_in_course(student, course):
-	filters = {"member": student.name, "course": course.name}
-	if not frappe.db.exists("LMS Enrollment", filters):
-		enrollment = frappe.new_doc("LMS Enrollment")
-		enrollment.member = student.name
-		enrollment.course = course.name
-		enrollment.save()
+def lesson_content(introduction, points):
+	blocks = [{"type": "paragraph", "data": {"text": introduction}}, {"type": "header", "data": {"text": "Ключевые идеи", "level": 2}}, {"type": "list", "data": {"style": "unordered", "items": [{"content": point, "items": []} for point in points]}}, {"type": "header", "data": {"text": "Проверьте себя", "level": 3}}, {"type": "paragraph", "data": {"text": "Сформулируйте одним предложением, как примените материал в ближайшей задаче."}}]
+	return json.dumps({"time": 1790294400000, "blocks": blocks, "version": "2.29.0"}, ensure_ascii=False)
 
 
-def create_progress(course, student, limit=None):
-	lessons = frappe.get_all(
-		"Course Lesson", {"course": course.name}, pluck="name", limit=limit, order_by="creation asc"
-	)
+def assessment_content(block_type, field, name):
+	return json.dumps({"time": 1790294400000, "blocks": [{"type": block_type, "data": {field: name}}], "version": "2.29.0"})
+
+
+def create_assignment(course, spec):
+	title, file_type, question, rubric = spec
+	doc = frappe.new_doc("LMS Assignment")
+	doc.update({"title": title, "course": course.name, "type": file_type, "question": f"<p>{question}</p>", "grading_rubric": "<ul>" + "".join(f"<li>{item} баллов</li>" for item in rubric) + "</ul>", "maximum_score": 100, "grade_assignment": 1})
+	doc.save()
+	return doc
+
+
+def create_quiz(course, questions):
+	quiz = frappe.new_doc("LMS Quiz")
+	quiz.update({"title": f"Итоговый тест — {course.title}", "course": course.name, "passing_percentage": 75, "max_attempts": 3, "duration": "15", "show_answers": 1, "show_submission_history": 1})
+	for text, options, correct in questions:
+		question = frappe.new_doc("LMS Question")
+		question.update({"question": text, "type": "Choices"})
+		for index, option in enumerate(options, 1):
+			question.set(f"option_{index}", option)
+			question.set(f"is_correct_{index}", int(index - 1 == correct))
+		question.save()
+		quiz.append("questions", {"question": question.name, "marks": 5})
+	quiz.save()
+	return quiz
+
+
+def enroll(student, course):
+	if not frappe.db.exists("LMS Enrollment", {"member": student.name, "course": course.name}):
+		frappe.get_doc({"doctype": "LMS Enrollment", "member": student.name, "course": course.name}).insert()
+
+
+def create_progress(course, student, limit):
+	lessons = frappe.get_all("Course Lesson", {"course": course.name}, pluck="name", limit=limit, order_by="creation asc")
 	for lesson in lessons:
-		filters = {"member": student.name, "lesson": lesson, "course": course.name}
-		if not frappe.db.exists("LMS Course Progress", filters):
-			progress = frappe.new_doc("LMS Course Progress")
-			progress.member = student.name
-			progress.lesson = lesson
-			progress.course = course.name
-			progress.status = "Complete"
-			progress.save()
-
+		if not frappe.db.exists("LMS Course Progress", {"member": student.name, "lesson": lesson, "course": course.name}):
+			frappe.get_doc({"doctype": "LMS Course Progress", "member": student.name, "lesson": lesson, "course": course.name, "status": "Complete"}).insert()
 	progress = get_course_progress(course.name, student.name)
-	frappe.db.set_value(
-		"LMS Enrollment", {"member": student.name, "course": course.name}, "progress", progress
-	)
-
-
-def get_video_content():
-	return {
-		"time": 1772450228627,
-		"blocks": [
-			{
-				"id": "bj6mK0D36z",
-				"type": "paragraph",
-				"data": {
-					"text": "YU-LMS allows you to embed videos in lessons using popular video hosting platforms."
-				},
-			},
-			{
-				"id": "1ooWPn5Zmq",
-				"type": "paragraph",
-				"data": {
-					"text": "You don't need to upload videos directly into YU-LMS - simply copy the video URL from your preferred provider and paste it into the Lesson Editor."
-				},
-			},
-			{
-				"id": "tCJD0yMAGd",
-				"type": "paragraph",
-				"data": {
-					"text": "YU-LMS automatically detects the video source and embeds it for learners."
-				},
-			},
-			{"id": "KpfuszbA09", "type": "markdown", "data": {"text": ""}},
-			{"id": "PZYmdlzQj2", "type": "header", "data": {"text": "YouTube", "level": 2}},
-			{
-				"id": "mJsIbQSHYO",
-				"type": "paragraph",
-				"data": {"text": "YouTube videos can be embedded using the standard watch URL."},
-			},
-			{"id": "-H8fLBsAMk", "type": "paragraph", "data": {"text": "<b>Supported URL format</b>"}},
-			{
-				"id": "Aiq-BfQkwZ",
-				"type": "paragraph",
-				"data": {
-					"text": '<code class="inline-code">https://www.youtube.com/watch?v=&lt;video-id&gt;</code>'
-				},
-			},
-			{"id": "8hMi323AbM", "type": "paragraph", "data": {"text": "<b>Example</b>"}},
-			{
-				"id": "3H6BzIshWg",
-				"type": "paragraph",
-				"data": {
-					"text": '<code class="inline-code">https://www.youtube.com/watch?v=SLNSSz41v_o</code>'
-				},
-			},
-			{"id": "yGSuw7Im0i", "type": "markdown", "data": {"text": ""}},
-			{"id": "WRVOABPAZO", "type": "header", "data": {"text": "Vimeo", "level": 2}},
-			{
-				"id": "AabHQjaQvo",
-				"type": "paragraph",
-				"data": {"text": "Vimeo videos are supported using the video URL."},
-			},
-			{"id": "q_9aNfNHEP", "type": "paragraph", "data": {"text": "<b>Supported URL format</b>"}},
-			{
-				"id": "1YYctmoyod",
-				"type": "paragraph",
-				"data": {"text": '<code class="inline-code">https://vimeo.com/&lt;video-id&gt;</code>'},
-			},
-			{"id": "OX_NGBxJTY", "type": "paragraph", "data": {"text": "<b>Example</b>"}},
-			{
-				"id": "KZYnrs_Dnf",
-				"type": "paragraph",
-				"data": {"text": '<code class="inline-code">https://vimeo.com/825334862</code>'},
-			},
-			{"id": "-mkC711EdF", "type": "markdown", "data": {"text": ""}},
-			{"id": "nSzyGY6f68", "type": "header", "data": {"text": "Cloudflare Stream", "level": 2}},
-			{
-				"id": "-cpNtfvP5T",
-				"type": "paragraph",
-				"data": {"text": "Cloudflare Stream provides secure video hosting with adaptive streaming."},
-			},
-			{"id": "e2fQ-DG6Nd", "type": "paragraph", "data": {"text": "<b>Supported URL format</b>"}},
-			{
-				"id": "av_Q4P66hb",
-				"type": "paragraph",
-				"data": {
-					"text": '<code class="inline-code">https://customer-&lt;account-id&gt;.cloudflarestream.com/&lt;video-id&gt;/watch</code>'
-				},
-			},
-			{"id": "8KCsx40NpJ", "type": "paragraph", "data": {"text": "<b>Example</b>"}},
-			{
-				"id": "USi0pW91df",
-				"type": "paragraph",
-				"data": {
-					"text": '<code class="inline-code">https://customer-f33zs165nr7gyfy4.cloudflarestream.com/6b9e68b07dfee8cc2d116e4c51d6a957/watch</code>'
-				},
-			},
-			{"id": "e6I0VuwXx9", "type": "markdown", "data": {"text": ""}},
-			{"id": "C-u44GnaTz", "type": "header", "data": {"text": "Bunny Stream", "level": 2}},
-			{
-				"id": "uR8XZtPVC5",
-				"type": "paragraph",
-				"data": {"text": "Bunny Stream allows fast, global video delivery with built-in analytics."},
-			},
-			{"id": "BYkm4Hy_v8", "type": "paragraph", "data": {"text": "<b>Supported URL format</b>"}},
-			{
-				"id": "TCM9COabp8",
-				"type": "paragraph",
-				"data": {
-					"text": '<code class="inline-code">https://iframe.mediadelivery.net/play/&lt;library-id&gt;/&lt;video-id&gt;</code>'
-				},
-			},
-			{"id": "KCiA6zVRYf", "type": "paragraph", "data": {"text": "<b>Example</b>"}},
-			{
-				"id": "kYDFL8Dn1v",
-				"type": "paragraph",
-				"data": {
-					"text": '<code class="inline-code">https://iframe.mediadelivery.net/play/579970/54b3e5a1-cf95-4f88-96d3-8387d93dc2f2</code>'
-				},
-			},
-			{"id": "jfnSgNAv5Q", "type": "markdown", "data": {"text": ""}},
-			{"id": "NCY3opj8uc", "type": "header", "data": {"text": "Important Notes", "level": 2}},
-			{
-				"id": "xHWE56ECqw",
-				"type": "paragraph",
-				"data": {"text": "Paste only the video URL, not iframe embed code"},
-			},
-			{
-				"id": "ZzrV99rSxJ",
-				"type": "paragraph",
-				"data": {"text": "The URL must match one of the supported formats above"},
-			},
-			{
-				"id": "jjg_inGE2B",
-				"type": "paragraph",
-				"data": {
-					"text": "Video privacy, access control, and streaming limits are managed by the video provider"
-				},
-			},
-		],
-		"version": "2.29.0",
-	}
-
-
-def get_google_suite_content():
-	return {
-		"time": 1772450743148,
-		"blocks": [
-			{
-				"id": "73fFo3DS18",
-				"type": "paragraph",
-				"data": {
-					"text": "You can integrate live Google Docs, Sheets, and Slides into your lessons to provide dynamic, up-to-date documentation and presentations."
-				},
-			},
-			{"id": "Z6I1ZV7Fvr", "type": "markdown", "data": {"text": ""}},
-			{
-				"id": "hiJVoYEhfN",
-				"type": "header",
-				"data": {"text": "How to Embed Google Workspace Files", "level": 3},
-			},
-			{
-				"id": "v9_hXM3d8b",
-				"type": "list",
-				"data": {
-					"style": "ordered",
-					"items": [
-						{"content": "Open your Google Doc, Sheet, or Slide.", "items": []},
-						{"content": "Make sure your permissions are set properly", "items": []},
-						{"content": "Copy your URL from the top browser address bar", "items": []},
-						{"content": "Now paste it in your lesson", "items": []},
-					],
-				},
-			},
-			{"id": "ycS1sd-0us", "type": "markdown", "data": {"text": ""}},
-			{"id": "NjN6_ixXRW", "type": "header", "data": {"text": "Integration Options", "level": 3}},
-			{
-				"id": "MgXDT0xV4X",
-				"type": "list",
-				"data": {
-					"style": "unordered",
-					"items": [
-						{
-							"content": "Google Slides:&nbsp;Perfect for presentations. These render with full navigation controls for the student.",
-							"items": [],
-						},
-						{
-							"content": "Google Sheets:&nbsp;Useful for sharing live data tables or interactive calculators.",
-							"items": [],
-						},
-						{
-							"content": "Google Docs:&nbsp;Best for course handouts, reading material, or live-updating documentation.",
-							"items": [],
-						},
-					],
-				},
-			},
-		],
-		"version": "2.29.0",
-	}
+	frappe.db.set_value("LMS Enrollment", {"member": student.name, "course": course.name}, "progress", progress)

@@ -2999,20 +2999,45 @@ def get_badges(member: str):
 @frappe.whitelist()
 def clear_demo_data():
 	frappe.only_for("Moderator")
-	quiz_title = "Do you know YU-LMS?"
-	if frappe.db.exists("LMS Quiz", {"title": quiz_title}):
-		frappe.db.delete("LMS Quiz", {"title": quiz_title})
-
-	demo_course = frappe.get_all(
+	demo_courses = frappe.get_all(
 		"LMS Course",
-		{"title": ["in", ["A guide to YU-LMS", "A guide to Frappe Learning"]]},
+		filters={
+			"title": ["in", ["A guide to YU-LMS", "A guide to Frappe Learning"]],
+		},
 		pluck="name",
 	)
+	demo_courses.extend(
+		frappe.get_all("LMS Course", {"tags": ["like", "%YU-DEMO-2026%"]}, pluck="name")
+	)
 
-	if len(demo_course):
-		delete_course(demo_course[0])
+	for course in dict.fromkeys(demo_courses):
+		assignments = frappe.get_all("LMS Assignment", {"course": course}, pluck="name")
+		quizzes = frappe.get_all("LMS Quiz", {"course": course}, pluck="name")
+		questions = (
+			frappe.get_all("LMS Quiz Question", {"parent": ["in", quizzes]}, pluck="question")
+			if quizzes
+			else []
+		)
+		delete_course(course)
+		for assignment in assignments:
+			frappe.delete_doc("LMS Assignment", assignment, ignore_permissions=True)
+		for quiz in quizzes:
+			frappe.delete_doc("LMS Quiz", quiz, ignore_permissions=True)
+		for question in questions:
+			if frappe.db.exists("LMS Question", question):
+				frappe.delete_doc("LMS Question", question, ignore_permissions=True)
 
-	users = ["ash@ipp.com", "john.doe@example.com", "jane.smith@example.com", "jannat@example.com"]
+	frappe.db.delete("LMS Quiz", {"title": "Do you know YU-LMS?"})
+
+	users = [
+		"ash@ipp.com",
+		"john.doe@example.com",
+		"jane.smith@example.com",
+		"jannat@example.com",
+		"student.demo@yessenov.edu.kz",
+		"student.two.demo@yessenov.edu.kz",
+		"instructor.demo@yessenov.edu.kz",
+	]
 	for user in users:
 		if frappe.db.exists("User", user):
 			frappe.delete_doc("User", user, ignore_permissions=True)
