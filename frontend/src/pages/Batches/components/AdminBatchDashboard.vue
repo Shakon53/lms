@@ -42,8 +42,14 @@
 		>
 			<div class="mb-3 flex items-center justify-between gap-3">
 				<div>
-					<h2 class="text-lg-semibold text-ink-gray-9">{{ __('Learners needing attention') }}</h2>
-					<p class="text-p-sm text-ink-gray-6">{{ __('Based on overdue work, low progress, and recent activity.') }}</p>
+					<h2 class="text-lg-semibold text-ink-gray-9">
+						{{ __('Learners needing attention') }}
+					</h2>
+					<p class="text-p-sm text-ink-gray-6">
+						{{
+							__('Based on overdue work, low progress, and recent activity.')
+						}}
+					</p>
 				</div>
 				<Badge theme="orange">{{ riskLearners.data.length }}</Badge>
 			</div>
@@ -54,11 +60,22 @@
 				:options="{ selectable: false, showTooltip: false }"
 			>
 				<template #cell="{ column, row, value }">
-					<span v-if="column.key === 'member_name'" class="flex items-center gap-2">
-						<Avatar :image="row.member_image as string" :label="String(value)" size="sm" />
+					<span
+						v-if="column.key === 'member_name'"
+						class="flex items-center gap-2"
+					>
+						<Avatar
+							:image="row.member_image as string"
+							:label="String(value)"
+							size="sm"
+						/>
 						<span>{{ value }}</span>
 					</span>
-					<Badge v-else-if="column.key === 'progress'" :theme="Number(value) < 25 ? 'red' : 'orange'">{{ value }}%</Badge>
+					<Badge
+						v-else-if="column.key === 'progress'"
+						:theme="Number(value) < 25 ? 'red' : 'orange'"
+						>{{ value }}%</Badge
+					>
 					<span v-else>{{ value }}</span>
 				</template>
 			</ResponsiveListView>
@@ -148,7 +165,7 @@
 						subtitle: __('Progress of students in courses and assessments'),
 						xAxis: {
 							key: 'task',
-							title: 'Tasks',
+							title: __('Tasks'),
 							type: 'category',
 						},
 						yAxis: {
@@ -276,7 +293,7 @@ const students = createListResource({
 })
 
 const filteredChartData = computed(() =>
-	(chartData.data || []).filter((item: { value: number }) => item.value > 0)
+	(chartData.data || []).filter((item: { value: number }) => item.value > 0),
 )
 
 const studentFilters = (): Record<string, any> => {
@@ -339,10 +356,10 @@ const showProgressChart = computed(
 	() =>
 		students.data?.length &&
 		(props.batch?.data?.courses?.length ||
-			props.batch?.data?.assessments?.length)
+			props.batch?.data?.assessments?.length),
 )
 
 const showStudentsEmptyState = computed(
-	() => !students.loading && !students.data?.length && !searchFilter.value
+	() => !students.loading && !students.data?.length && !searchFilter.value,
 )
 </script>

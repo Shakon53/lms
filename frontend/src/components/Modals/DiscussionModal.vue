@@ -4,7 +4,7 @@
 		size="2xl"
 		:actions="[
 			{
-				label: 'Post',
+				label: __('Post'),
 				variant: 'solid',
 				onClick: ({ close }) => submitTopic(close),
 			},
@@ -100,7 +100,7 @@ const createReply = (topicName, close) => {
 			topic.title = ''
 			topic.reply = ''
 			Promise.resolve(topics.value.reload()).then(() =>
-				emit('created', topicName)
+				emit('created', topicName),
 			)
 			capture('discussion_topic_created')
 			close()

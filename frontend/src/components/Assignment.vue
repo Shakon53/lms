@@ -83,7 +83,7 @@
 					{{ __("You've successfully submitted the assignment.") }}
 					{{
 						__(
-							"Once the moderator grades your submission, you'll find the details here."
+							"Once the moderator grades your submission, you'll find the details here.",
 						)
 					}}
 					{{ __('Feel free to make edits to your submission if needed.') }}
@@ -188,8 +188,7 @@
 				</div>
 				<div
 					v-if="
-						submissionResource.doc?.earned_score != null &&
-						!canGradeSubmission
+						submissionResource.doc?.earned_score != null && !canGradeSubmission
 					"
 					class="rounded-lg border bg-surface-gray-2 p-3 text-ink-gray-9"
 				>
@@ -358,7 +357,7 @@ const addNewSubmission = () => {
 	let doc = prepareSubmissionDoc()
 	if (!doc.assignment_attachment && !doc.answer) {
 		toast.error(
-			__('Please provide an answer or upload a file before submitting.')
+			__('Please provide an answer or upload a file before submitting.'),
 		)
 		isSubmitting.value = false
 		return
@@ -415,7 +414,7 @@ const updateSubmission = () => {
 				toast.error(err.messages?.[0] || err)
 				console.error(err)
 			},
-		}
+		},
 	)
 }
 
@@ -486,9 +485,9 @@ const canModifyAssignment = computed(() => {
 
 const submissionStatusOptions = computed(() => {
 	return [
-		{ label: 'Not Graded', value: 'Not Graded' },
-		{ label: 'Pass', value: 'Pass' },
-		{ label: 'Fail', value: 'Fail' },
+		{ label: __('Not Graded'), value: 'Not Graded' },
+		{ label: __('Pass'), value: 'Pass' },
+		{ label: __('Fail'), value: 'Fail' },
 	]
 })
 

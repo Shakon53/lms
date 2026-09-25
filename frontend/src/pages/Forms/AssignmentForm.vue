@@ -124,7 +124,7 @@ const { close, saveAndReplace } = useFormRoute({ name: 'Assignments' })
 const isNew = computed(() => props.assignmentID === 'new')
 
 const formTitle = computed(() =>
-	isNew.value ? __('Create an Assignment') : __('Edit Assignment')
+	isNew.value ? __('Create an Assignment') : __('Edit Assignment'),
 )
 
 // Copied off the two places Assignments.vue gates this form today: the page
@@ -194,7 +194,7 @@ watch(
 		assignment.grading_rubric = doc.grading_rubric || ''
 		assignment.maximum_score = Number(doc.maximum_score ?? 100)
 	},
-	{ immediate: true }
+	{ immediate: true },
 )
 
 // Deliberately NOT the parent list's cache key, unlike NewBatchForm.vue:178.
@@ -224,7 +224,7 @@ const newAssignment = createResource({
 })
 
 const saving = computed<boolean>(() =>
-	Boolean(newAssignment.loading || assignmentDoc?.setValue?.loading)
+	Boolean(newAssignment.loading || assignmentDoc?.setValue?.loading),
 )
 
 const validateFields = (): void => {
@@ -251,7 +251,7 @@ const updateAssignment = (): void => {
 				toast.error(err.messages?.[0] || err)
 				console.error(err)
 			},
-		}
+		},
 	)
 }
 
@@ -264,11 +264,11 @@ const saveAssignment = (): void => {
 
 const assignmentOptions = computed(() => {
 	return [
-		{ label: 'PDF', value: 'PDF' },
-		{ label: 'Image', value: 'Image' },
-		{ label: 'Document', value: 'Document' },
-		{ label: 'Text', value: 'Text' },
-		{ label: 'URL', value: 'URL' },
+		{ label: __('PDF'), value: 'PDF' },
+		{ label: __('Image'), value: 'Image' },
+		{ label: __('Document'), value: 'Document' },
+		{ label: __('Text'), value: 'Text' },
+		{ label: __('URL'), value: 'URL' },
 	]
 })
 </script>

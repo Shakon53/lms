@@ -1,7 +1,7 @@
 <template>
 	<Dialog
 		v-model:open="show"
-		title="Student Progress"
+		:title="__('Student Progress')"
 		:size="hasAssessmentData ? '4xl' : 'xl'"
 	>
 		<template #default>

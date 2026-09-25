@@ -7,7 +7,7 @@ import {
 	it,
 	vi,
 } from 'vitest'
-import { flushPromises, mount } from '@vue/test-utils'
+import { config, flushPromises, mount } from '@vue/test-utils'
 
 // `new pdfjsLib.PDFWorker({ port })` reaches the REAL pdf.js class here even
 // though `getDocument` is mocked, so pdf.js spins up its in-process fallback
@@ -85,6 +85,7 @@ const createPdfWorker = vi.hoisted(() => vi.fn())
 vi.mock('@/utils/pdfWorker', () => ({ createPdfWorker }))
 
 beforeEach(() => {
+	config.global.mocks.__ = (text: string) => text
 	// jsdom's rAF fires on a ~16ms timer, so `nextFrame()` outlives
 	// flushPromises() and load() is still mid-flight when a test ends. Running
 	// the callback synchronously lets load() finish inside the test instead of
@@ -135,7 +136,7 @@ describe('PdfBlock', () => {
 		const wrapper = await mountPdf()
 		expect(wrapper.find('.pdf-error').exists()).toBe(true)
 		expect(wrapper.find('.pdf-fallback-link').attributes('href')).toBe(
-			'/files/x.pdf'
+			'/files/x.pdf',
 		)
 		wrapper.unmount()
 	})

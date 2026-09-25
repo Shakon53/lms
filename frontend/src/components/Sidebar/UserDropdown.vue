@@ -8,8 +8,8 @@
 						isCollapsed
 							? 'px-0 w-auto'
 							: open
-							? 'bg-surface-base shadow-sm px-2 w-52'
-							: 'hover:bg-surface-gray-3 px-2 w-52'
+								? 'bg-surface-base shadow-sm px-2 w-52'
+								: 'hover:bg-surface-gray-3 px-2 w-52'
 					"
 				>
 					<img
@@ -154,7 +154,7 @@ watch(
 	() => settingsStore.isSettingsOpen,
 	(value) => {
 		showSettingsModal.value = value
-	}
+	},
 )
 
 const userDropdownOptions = computed(() => {
@@ -173,7 +173,7 @@ const userDropdownOptions = computed(() => {
 				},
 				{
 					icon: 'lucide-user',
-					label: 'My Profile',
+					label: __('My Profile'),
 					onClick: () => {
 						router.push(`/user/${userResource.data?.username}`)
 					},
@@ -183,7 +183,7 @@ const userDropdownOptions = computed(() => {
 				},
 				{
 					icon: theme.value === 'light' ? Moon : Sun,
-					label: 'Toggle Theme',
+					label: __('Toggle Theme'),
 					onClick: () => {
 						toggleTheme()
 					},
@@ -194,7 +194,7 @@ const userDropdownOptions = computed(() => {
 					submenu: appMenuItems.value,
 					condition: () => {
 						let cookies = new URLSearchParams(
-							document.cookie.split('; ').join('&')
+							document.cookie.split('; ').join('&'),
 						)
 						let system_user = cookies.get('system_user')
 						if (system_user === 'yes') return true
@@ -203,7 +203,7 @@ const userDropdownOptions = computed(() => {
 				},
 				{
 					icon: 'lucide-settings',
-					label: 'Settings',
+					label: __('Settings'),
 					onClick: () => {
 						settingsStore.isSettingsOpen = true
 					},
@@ -231,7 +231,7 @@ const userDropdownOptions = computed(() => {
 					},
 				},
 				{
-					label: 'Clear Demo Data',
+					label: __('Clear Demo Data'),
 					icon: 'lucide-trash-2',
 					onClick: () => {
 						clearDemoDataConfirmation()
@@ -245,12 +245,12 @@ const userDropdownOptions = computed(() => {
 				},
 				{
 					icon: FrappeCloudIcon,
-					label: 'Login to Frappe Cloud',
+					label: __('Login to Frappe Cloud'),
 					onClick: () => {
 						$dialog({
 							title: __('Login to Frappe Cloud?'),
 							message: __(
-								'Are you sure you want to login to your Frappe Cloud dashboard?'
+								'Are you sure you want to login to your Frappe Cloud dashboard?',
 							),
 							actions: [
 								{
@@ -273,7 +273,7 @@ const userDropdownOptions = computed(() => {
 				},
 				{
 					icon: 'lucide-log-out',
-					label: 'Log out',
+					label: __('Log out'),
 					onClick: () => {
 						logout.submit().then(() => {
 							isLoggedIn = false
@@ -285,7 +285,7 @@ const userDropdownOptions = computed(() => {
 				},
 				{
 					icon: 'lucide-log-in',
-					label: 'Log in',
+					label: __('Log in'),
 					onClick: () => {
 						window.location.href = '/login'
 					},
@@ -307,7 +307,7 @@ const clearDemoDataConfirmation = () => {
 	$dialog({
 		title: __('Confirm clearing demo data?'),
 		message: __(
-			'Are you sure you want to clear the demo data? This will delete the YU-LMS introduction course and all associated data. This action cannot be undone.'
+			'Are you sure you want to clear the demo data? This will delete the YU-LMS introduction course and all associated data. This action cannot be undone.',
 		),
 		actions: [
 			{

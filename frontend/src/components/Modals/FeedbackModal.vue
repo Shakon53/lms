@@ -61,35 +61,35 @@ const props = defineProps({
 const feedbackColumns = computed(() => {
 	return [
 		{
-			label: 'Member',
+			label: __('Member'),
 			key: 'member_name',
 			width: '10rem',
 			align: 'left',
 			icon: 'lucide-user',
 		},
 		{
-			label: 'Feedback',
+			label: __('Feedback'),
 			key: 'feedback',
 			width: '15rem',
 			align: 'left',
 			icon: 'lucide-message-square',
 		},
 		{
-			label: 'Content',
+			label: __('Content'),
 			key: 'content',
 			width: '10rem',
 			align: 'left',
 			icon: 'lucide-book',
 		},
 		{
-			label: 'Instructors',
+			label: __('Instructors'),
 			key: 'instructors',
 			width: '10rem',
 			align: 'left',
 			icon: 'lucide-users',
 		},
 		{
-			label: 'Value',
+			label: __('Value'),
 			key: 'value',
 			width: '10rem',
 			align: 'left',

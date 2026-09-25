@@ -74,7 +74,7 @@ const assessment = ref(null)
 const dueDate = ref('')
 
 const { close, saveAndReplace } = useFormRoute(
-	batchRouteLocation('BatchDetail', props.batchName, route.hash)
+	batchRouteLocation('BatchDetail', props.batchName, route.hash),
 )
 
 // Copied from Assessments.vue's canAddAssessments() gate on the Add button. A
@@ -91,9 +91,9 @@ const refusal = computed(() => {
 })
 
 const assessmentTypes = computed(() => [
-	{ label: 'Quiz', value: 'LMS Quiz' },
-	{ label: 'Assignment', value: 'LMS Assignment' },
-	{ label: 'Programming Exercise', value: 'LMS Programming Exercise' },
+	{ label: __('Quiz'), value: 'LMS Quiz' },
+	{ label: __('Assignment'), value: 'LMS Assignment' },
+	{ label: __('Programming Exercise'), value: 'LMS Programming Exercise' },
 ])
 
 const assessmentResource = createResource({
@@ -150,13 +150,13 @@ const submit = () => {
 				reloadAssessments()
 				toast.success(__('Assessment added successfully'))
 				saveAndReplace(
-					batchRouteLocation('BatchDetail', props.batchName, route.hash)
+					batchRouteLocation('BatchDetail', props.batchName, route.hash),
 				)
 			},
 			onError(err) {
 				toast.error(err.messages?.[0] || err)
 			},
-		}
+		},
 	)
 }
 </script>

@@ -5,7 +5,7 @@
 		size="xl"
 		:actions="[
 			{
-				label: 'Submit',
+				label: __('Submit'),
 				variant: 'solid',
 				onClick: ({ close }) => submitReview(close),
 			},
@@ -70,7 +70,7 @@ function submitReview(close: () => void) {
 			close()
 		},
 		onError(err: { messages?: string[] } | string) {
-			const msg = typeof err === 'string' ? err : err.messages?.[0] ?? 'Error'
+			const msg = typeof err === 'string' ? err : (err.messages?.[0] ?? 'Error')
 			toast.error(msg)
 		},
 	})

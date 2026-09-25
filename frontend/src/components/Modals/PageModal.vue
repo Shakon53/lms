@@ -5,7 +5,7 @@
 		size="lg"
 		:actions="[
 			{
-				label: 'Add',
+				label: __('Add'),
 				variant: 'solid',
 				onClick: ({ close }) => {
 					addWebPage(close)
@@ -66,7 +66,7 @@ watch(
 			page.webpage = newPage.web_page
 		}
 	},
-	{ immediate: true }
+	{ immediate: true },
 )
 
 const addWebPage = (close) => {
@@ -82,7 +82,7 @@ const addWebPage = (close) => {
 				toast.error(err.message[0] || err)
 				close()
 			},
-		}
+		},
 	)
 }
 </script>

@@ -40,7 +40,7 @@ const FADE_MS = 300
 const collected = ref({})
 
 const PERSONALISE_HINT = __(
-	'This helps us personalise your learning experience.'
+	'This helps us personalise your learning experience.',
 )
 
 // The whole flow is driven by this data. Steps render by `type`; adding or
@@ -237,7 +237,7 @@ const leaveTo = async (route, persist) => {
 
 usePageMeta(() => {
 	return {
-		title: 'Persona',
+		title: __('Persona'),
 		icon: brand.favicon,
 	}
 })
