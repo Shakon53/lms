@@ -180,7 +180,9 @@ def create_course_content(course, spec):
 	quiz = create_quiz(course, spec["quiz"])
 	for chapter_title, lessons in spec["chapters"]:
 		chapter = frappe.get_doc({"doctype": "Course Chapter", "course": course.name, "title": chapter_title}).insert()
+		course.reload()
 		course.append("chapters", {"chapter": chapter.name})
+		course.save()
 		for lesson_spec in lessons:
 			if lesson_spec[1] == "quiz":
 				content = assessment_content("quiz", "quiz", quiz.name)
@@ -191,7 +193,6 @@ def create_course_content(course, spec):
 			lesson = frappe.get_doc({"doctype": "Course Lesson", "course": course.name, "chapter": chapter.name, "title": lesson_spec[0], "content": content}).insert()
 			chapter.append("lessons", {"lesson": lesson.name})
 		chapter.save()
-	course.save()
 
 
 def lesson_content(introduction, points):
