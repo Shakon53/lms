@@ -37,7 +37,10 @@ def ensure_supported_languages():
 	}
 	for code, language_name in languages.items():
 		if frappe.db.exists("Language", code):
-			frappe.db.set_value("Language", code, "enabled", 1)
+			language = frappe.get_doc("Language", code)
+			if not language.enabled:
+				language.enabled = 1
+				language.save(ignore_permissions=True)
 			continue
 		frappe.get_doc(
 			{
