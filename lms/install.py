@@ -23,8 +23,30 @@ def ensure_batch_enrollment_index():
 
 def after_sync():
 	create_lms_roles()
+	ensure_supported_languages()
 	set_default_certificate_print_format()
 	give_lms_roles_to_admin()
+
+
+def ensure_supported_languages():
+	"""Keep the three languages exposed by the LMS switcher available."""
+	languages = {
+		"en": "English",
+		"ru": "Русский",
+		"kk": "Қазақша",
+	}
+	for code, language_name in languages.items():
+		if frappe.db.exists("Language", code):
+			frappe.db.set_value("Language", code, "enabled", 1)
+			continue
+		frappe.get_doc(
+			{
+				"doctype": "Language",
+				"language_code": code,
+				"language_name": language_name,
+				"enabled": 1,
+			}
+		).insert(ignore_permissions=True)
 
 
 def before_uninstall():

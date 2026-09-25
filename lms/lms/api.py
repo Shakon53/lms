@@ -200,11 +200,26 @@ def _doctype_permissions():
 
 @frappe.whitelist(allow_guest=True)
 def get_translations():
-	if frappe.session.user != "Guest":
-		language = frappe.db.get_value("User", frappe.session.user, "language")
-	else:
-		language = frappe.db.get_single_value("System Settings", "language")
+	language = frappe.local.lang or frappe.translate.get_user_lang()
 	return get_all_translations(language)
+
+
+@frappe.whitelist(allow_guest=True)
+def set_language(language: str):
+	"""Persist one of the languages supported by the public LMS shell."""
+	allowed_languages = {"en", "ru", "kk"}
+	if language not in allowed_languages:
+		frappe.throw(_("Unsupported language."), frappe.ValidationError)
+
+	if frappe.session.user == "Guest":
+		frappe.local.cookie_manager.set_cookie(
+			"preferred_language",
+			language,
+			max_age=60 * 60 * 24 * 365,
+		)
+	else:
+		frappe.db.set_value("User", frappe.session.user, "language", language)
+	return {"language": language}
 
 
 @frappe.whitelist()

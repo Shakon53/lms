@@ -64,6 +64,7 @@ const build = (overrides: Partial<Parameters<typeof buildYouRows>[0]> = {}) =>
 		otherLinks: OTHER,
 		primaryLabels: PRIMARY,
 		themePreference: 'system',
+		language: 'en',
 		hasRoute: () => true,
 		...overrides,
 	})
@@ -188,7 +189,11 @@ describe('notifications', () => {
 		const groups = build({
 			otherLinks: OTHER.filter((l) => l.to !== 'Notifications'),
 		})
-		expect(labelsIn(groups, 'Settings')).toEqual(['Colour mode', 'Log out'])
+		expect(labelsIn(groups, 'Settings')).toEqual([
+			'Colour mode',
+			'Language',
+			'Log out',
+		])
 	})
 })
 
@@ -199,6 +204,7 @@ describe('the last group', () => {
 		expect(labelsIn(build(), 'Settings')).toEqual([
 			'Notifications',
 			'Colour mode',
+			'Language',
 			'Log out',
 		])
 		expect(allRows(build()).map((row) => row.label)).not.toContain('Settings')
@@ -264,6 +270,7 @@ describe('every icon the page can draw', () => {
 			'lucide-mail',
 			'lucide-bell',
 			'lucide-sun-moon',
+			'lucide-languages',
 			'lucide-log-out',
 		])
 	})

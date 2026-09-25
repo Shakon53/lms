@@ -222,6 +222,20 @@ describe('a signed-out visitor who types the URL', () => {
 		expect(wrapper.find('[data-testid="you-signed-out"]').exists()).toBe(true)
 		expect(wrapper.text()).not.toContain('Log out')
 	})
+
+	it('can change the guest language without account controls', async () => {
+		isLoggedIn.value = false
+		userResource.data = null
+		const { wrapper } = await openYou()
+
+		expect(rowLabelled(wrapper, 'Language')).toBeDefined()
+		await rowLabelled(wrapper, 'Language')?.trigger('click')
+
+		const sheet = wrapper.get('[data-testid="language-sheet"]')
+		expect(sheet.text()).toContain('English (EN)')
+		expect(sheet.text()).toContain('Русский (RU)')
+		expect(sheet.text()).toContain('Қазақша (KZ)')
+	})
 })
 
 describe('picking a row', () => {

@@ -10,7 +10,9 @@ import { describe, expect, it } from 'vitest'
 import {
 	COLOUR_MODE_ACTION,
 	buildAppearanceRows,
+	buildLanguageRows,
 	colourModeRow,
+	languageRow,
 	seedCheckboxDefaults,
 } from '@/components/Settings/mobileSettings'
 
@@ -76,5 +78,21 @@ describe('buildAppearanceRows', () => {
 
 		expect(group.rows.every((r) => r.to === undefined)).toBe(true)
 		expect(group.rows.map((r) => r.action)).toEqual(['system', 'light', 'dark'])
+	})
+})
+
+describe('language settings', () => {
+	it('shows the active language on the account row', () => {
+		expect(languageRow('kk')).toMatchObject({
+			label: 'Language',
+			value: 'KZ',
+			action: 'language',
+		})
+	})
+
+	it('builds three choices and selects the current language', () => {
+		const [group] = buildLanguageRows('ru')
+		expect(group.rows.map((row) => row.action)).toEqual(['en', 'ru', 'kk'])
+		expect(group.rows.find((row) => row.selected)?.action).toBe('ru')
 	})
 })

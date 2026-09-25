@@ -1,18 +1,21 @@
 <template>
 	<MobilePageLayout :title="__('You')" :show-header="false" grouped>
-		<div
-			v-if="!isSignedIn"
-			class="flex flex-col items-start gap-3 pt-4"
-			data-testid="you-signed-out"
-		>
-			<p class="text-p-base text-ink-gray-6">{{ signedOutPrompt }}</p>
-			<a
-				href="/login"
-				class="text-p-base font-medium text-ink-gray-9 underline underline-offset-2"
+		<template v-if="!isSignedIn">
+			<div
+				class="flex flex-col items-start gap-3 pt-4"
+				data-testid="you-signed-out"
 			>
-				{{ logInLabel }}
-			</a>
-		</div>
+				<p class="text-p-base text-ink-gray-6">{{ signedOutPrompt }}</p>
+				<a
+					href="/login"
+					class="text-p-base font-medium text-ink-gray-9 underline underline-offset-2"
+				>
+					{{ logInLabel }}
+				</a>
+			</div>
+
+			<SettingsRowList :groups="guestGroups" @action="activate" />
+		</template>
 
 		<template v-else>
 			<div
@@ -65,6 +68,19 @@
 				/>
 			</div>
 		</BottomSheet>
+
+		<BottomSheet
+			:model-value="showLanguage"
+			:title="__('Language')"
+			@update:model-value="showLanguage = false"
+		>
+			<div data-testid="language-sheet" class="px-3">
+				<SettingsRowList
+					:groups="buildLanguageRows(activeLanguage)"
+					@action="chooseLanguage"
+				/>
+			</div>
+		</BottomSheet>
 	</MobilePageLayout>
 </template>
 
@@ -100,9 +116,18 @@ import SettingsRowList from '@/components/Settings/Mobile/SettingsRowList.vue'
 import { buildYouRows } from '@/components/Settings/youRows'
 import {
 	buildAppearanceRows,
+	buildLanguageRows,
 	COLOUR_MODE_ACTION,
+	languageRow,
+	LANGUAGE_ACTION,
+	type MobileRowGroup,
 	type SettingsUser,
 } from '@/components/Settings/mobileSettings'
+import {
+	changeLanguage,
+	currentLanguage,
+	type LMSLanguageCode,
+} from '@/utils/language'
 
 const router = useRouter()
 const { logout, brand } = sessionStore()
@@ -173,6 +198,7 @@ const groups = computed(() =>
 		otherLinks: otherLinks.value,
 		primaryLabels: primaryLabels.value,
 		themePreference: themePreference.value,
+		language: activeLanguage.value,
 		unreadCount: unreadCount.value,
 		hasRoute: (name: string) => router.hasRoute(name),
 	})
@@ -203,6 +229,14 @@ watch(
 onMounted(() => loadUnreadCount())
 
 const showColourMode = ref(false)
+const showLanguage = ref(false)
+const activeLanguage = ref<LMSLanguageCode>(currentLanguage())
+const guestGroups = computed<MobileRowGroup[]>(() => [
+	{
+		key: LANGUAGE_ACTION,
+		rows: [languageRow(activeLanguage.value)],
+	},
+])
 
 // Called from script rather than inline in the template: a `<script setup>`
 // template resolves only what the component exposes.
@@ -238,9 +272,15 @@ const chooseColourMode = (mode: string): void => {
 	showColourMode.value = false
 }
 
+const chooseLanguage = async (language: string): Promise<void> => {
+	showLanguage.value = false
+	await changeLanguage(language as LMSLanguageCode)
+}
+
 const activate = (action: string): void => {
 	if (action === 'notifications') toggleNotifications()
 	else if (action === COLOUR_MODE_ACTION) showColourMode.value = true
+	else if (action === LANGUAGE_ACTION) showLanguage.value = true
 	else if (action === 'logout') logout.submit()
 }
 

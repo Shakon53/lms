@@ -77,9 +77,15 @@ import { createDialog } from '@/utils/dialogs'
 import FrappeCloudIcon from '@/components/Icons/FrappeCloudIcon.vue'
 import LMSLogo from '@/components/Icons/LMSLogo.vue'
 import SettingsModal from '@/components/Settings/Settings.vue'
-import { Moon, Sun } from 'lucide-vue-next'
+import { Check, Languages, Moon, Sun } from 'lucide-vue-next'
 import { safeUrl } from '@/utils/safeUrl'
 import { openExternal } from '@/utils/openExternal'
+import {
+	changeLanguage,
+	currentLanguage,
+	languageShortLabel,
+	LMS_LANGUAGES,
+} from '@/utils/language'
 
 const router = useRouter()
 const { logout, branding } = sessionStore()
@@ -156,6 +162,15 @@ const userDropdownOptions = computed(() => {
 		{
 			group: '',
 			items: [
+				{
+					icon: Languages,
+					label: `${__('Language')} · ${languageShortLabel()}`,
+					submenu: LMS_LANGUAGES.map((language) => ({
+						icon: currentLanguage() === language.code ? Check : undefined,
+						label: `${language.label} (${language.shortLabel})`,
+						onClick: () => changeLanguage(language.code),
+					})),
+				},
 				{
 					icon: 'lucide-user',
 					label: 'My Profile',

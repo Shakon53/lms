@@ -1,5 +1,10 @@
 import type { RouteLocationRaw } from 'vue-router'
 import type { ThemePreference } from '@/utils/theme'
+import {
+	languageShortLabel,
+	LMS_LANGUAGES,
+	type LMSLanguageCode,
+} from '@/utils/language'
 
 // Every grouped list a phone draws is a list of these, and `SettingsRowList` is
 // the only thing that knows how one is drawn. A screen declares objects; it does
@@ -89,6 +94,7 @@ const COLOUR_MODE_LABELS: Record<string, string> = {
 }
 
 export const COLOUR_MODE_ACTION = 'colour-mode'
+export const LANGUAGE_ACTION = 'language'
 
 // Exported because the You page lists this row. It reports being picked rather
 // than routing somewhere: the picker is a sheet, so there is one way to choose
@@ -100,6 +106,14 @@ export const colourModeRow = (themePreference: ThemePreference): MobileRow => ({
 	icon: 'lucide-sun-moon',
 	value: COLOUR_MODE_LABELS[themePreference] || 'System',
 	action: COLOUR_MODE_ACTION,
+})
+
+export const languageRow = (language: LMSLanguageCode): MobileRow => ({
+	key: LANGUAGE_ACTION,
+	label: 'Language',
+	icon: 'lucide-languages',
+	value: languageShortLabel(language),
+	action: LANGUAGE_ACTION,
 })
 
 // What a phone screen needs of `get_user_info` — a subset of its payload, named
@@ -126,6 +140,20 @@ export const buildAppearanceRows = (
 			label: mode.label,
 			action: mode.value,
 			selected: themePreference === mode.value,
+		})),
+	},
+]
+
+export const buildLanguageRows = (
+	currentLanguage: LMSLanguageCode
+): MobileRowGroup[] => [
+	{
+		key: LANGUAGE_ACTION,
+		rows: LMS_LANGUAGES.map((language) => ({
+			key: language.code,
+			label: `${language.label} (${language.shortLabel})`,
+			action: language.code,
+			selected: currentLanguage === language.code,
 		})),
 	},
 ]
